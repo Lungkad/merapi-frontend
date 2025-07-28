@@ -43,7 +43,7 @@ function App() {
             <Route path="/merapiintro" element={<MerapiIntro />} />
             <Route path="/information" element={<Information />} />
             <Route path="/maps" element={<Maps />} />
-            <Route path="/beritas" element={<Beritas />} />
+            <Route path="/berita" element={<Beritas />} />
             <Route path="/login" element={<Login />} />
 
             <Route path="/mapsbarak" element={<MapsBarak />} />

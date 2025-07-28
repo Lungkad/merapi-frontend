@@ -71,28 +71,19 @@ const Home = () => {
 
           <nav className="hidden md:flex gap-8 text-white font-medium">
             <a href="/" className="text-red-400 border-b-2 border-red-400">
-              Home
+              Beranda
             </a>
-            <a
-              href="/merapiintro"
-              className="hover:text-red-400 transition-colors"
-            >
-              Introduction
+            <a href="/merapiintro" className="hover:text-red-400 transition-colors">
+              Tentang
             </a>
             <a href="/mapsbarak" className="hover:text-red-400 transition-colors">
-              Maps
+              Peta
             </a>
-            <a
-              href="/information"
-              className="hover:text-red-400 transition-colors"
-            >
+            <a href="/information"  className="hover:text-red-400 transition-colors">
               Mitigasi
             </a>
-            <a
-              href="beritas"
-              className="hover:text-red-400 transition-colors"
-            >
-              News
+            <a href="/berita" className="hover:text-red-400 transition-colors">
+              Berita
             </a>
           </nav>
 

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { barakAPI } from "../services/api";
-import { desaOptions, kecamatanOptions } from "../constants/options";
+import { desaOptions, kecamatanOptions, bangunanOptions } from "../constants/options";
 
 const BarakEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [formData, setFormData] = useState({
     nama_barak: "",
+    tipe_bangunan: "",
     kapasitas: "",
     fasilitas: "",
     alamat: "",
@@ -99,6 +100,12 @@ const BarakEdit = () => {
             {
               id: "nama_barak",
               label: "Nama Barak",
+              type: "text",
+              required: true,
+            },
+            {
+              id: "tipe_bangunan",
+              label: "Tipe Bangunan",
               type: "text",
               required: true,
             },
@@ -197,7 +204,26 @@ const BarakEdit = () => {
                       ))}
                     </datalist>
                   </>
-                ) : isTextArea ? (
+                ) : field.id === "tipe_bangunan" ? (
+                  <>
+                    <input
+                      list="bangunan-list"
+                      id="tipe_bangunan"
+                      name="tipe_bangunan"
+                      value={formData.tipe_bangunan}
+                      onChange={handleChange}
+                      className={inputClass}
+                      placeholder="Ketik atau pilih tipe bangunan"
+                      required={field.required}
+                    />
+                    <datalist id="bangunan-list">
+                      {bangunanOptions.map((option, i) => (
+                        <option key={i} value={option} />
+                      ))}
+                    </datalist>
+                  </>
+                )
+                 : isTextArea ? (
                   <textarea
                     id={field.id}
                     name={field.id}

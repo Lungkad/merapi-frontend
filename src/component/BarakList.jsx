@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/logo.png";
-import { TrendingUp, Tent, Newspaper, PanelBottom } from "lucide-react";
+import { TrendingUp, Tent, Newspaper, PanelBottom, User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { barakAPI } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const BarakList = () => {
   const [baraks, setBaraks] = useState([]);
@@ -12,6 +12,7 @@ const BarakList = () => {
   const [pagination, setPagination] = useState(null);
   const [alert, setAlert] = useState(null);
   const [sortOrder, setSortOrder] = useState("desc");
+  const { logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState("baraks");
   const navigate = useNavigate();
@@ -36,6 +37,10 @@ const BarakList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   const handleDelete = async (id) => {
@@ -120,18 +125,27 @@ const BarakList = () => {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-gray-800">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-sm font-semibold">A</span>
+        <div className="p-6 border-t border-gray-800">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-white" />
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-gray-400">admin@example.com</p>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-white">Admininstrator</p>
+              <p className="text-xs text-gray-400">admin@merapi.com</p>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="mt-4 w-full flex items-center justify-center px-6 py-2 text-red-500 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            Logout
+          </button>
         </div>
       </div>
+
+      {/* Main Content */}
       <div className="flex-1 p-6 overflow-auto">
         {alert && (
           <div
@@ -161,21 +175,21 @@ const BarakList = () => {
           </Link>
         </div>
         <div className="flex justify-end mb-4">
-        <label className="mr-2 text-sm font-medium text-gray-700">
-          Urutkan:
-        </label>
-        <select
-          value={sortOrder}
-          onChange={(e) => {
-            setSortOrder(e.target.value);
-            fetchBaraks(currentPage, e.target.value); // fetch ulang
-          }}
-          className="border border-gray-300 text-sm rounded px-2 py-1"
-        >
-          <option value="desc">Terbaru</option>
-          <option value="asc">Terlama</option>
-        </select>
-      </div>
+          <label className="mr-2 text-sm font-medium text-gray-700">
+            Urutkan:
+          </label>
+          <select
+            value={sortOrder}
+            onChange={(e) => {
+              setSortOrder(e.target.value);
+              fetchBaraks(currentPage, e.target.value); // fetch ulang
+            }}
+            className="border border-gray-300 text-sm rounded px-2 py-1"
+          >
+            <option value="desc">Terbaru</option>
+            <option value="asc">Terlama</option>
+          </select>
+        </div>
         <div className="bg-white rounded shadow overflow-hidden">
           {baraks.length > 0 ? (
             <>

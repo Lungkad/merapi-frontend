@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
+    "@react-leaflet/core": "^3.0.0",
     "axios": "^1.10.0",
     "js-cookie": "^3.0.5",
     "leaflet": "^1.9.4",
+    "leaflet-routing-machine": "^3.2.12",
     "leaflet.awesome-markers": "^2.0.5",
+    "lrm-graphhopper": "^1.3.0",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

@@ -1,31 +1,26 @@
 import React, { useState } from "react";
 import {
-  Users,
-  Eye,
-  Clock,
   TrendingUp,
   Tent,
   Newspaper,
   LogOut,
   User,
   PanelBottom,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useStatus } from "./StatusContext";
 import { statusConfig, getAllStatuses } from "../config/statusConfig";
+import { useAuth } from "../contexts/AuthContext";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const navigate = useNavigate();
   const { currentStatus, updateStatus, lastUpdated } = useStatus();
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    // localStorage.removeItem('auth_token'); // Browser storage tidak didukung
-    console.log("Logout clicked");
+    logout();
   };
 
   const StatCard = ({
@@ -72,29 +67,6 @@ const Dashboard = () => {
     </div>
   );
 
-  const StatusCard = ({ title, status, description, icon: Icon, color }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <div className={`p-2 rounded-lg bg-${color}-100`}>
-          <Icon className={`w-5 h-5 text-${color}-600`} />
-        </div>
-      </div>
-      <div
-        className={`text-2xl font-bold mb-2 ${
-          status === "Normal"
-            ? "text-green-600"
-            : status === "Waspada"
-            ? "text-yellow-600"
-            : "text-red-600"
-        }`}
-      >
-        {status}
-      </div>
-      <p className="text-gray-600 text-sm">{description}</p>
-    </div>
-  );
-  
   const formatTime = (date) => {
     return date.toLocaleString("id-ID", {
       day: "numeric",
@@ -108,7 +80,7 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-64 bg-black text-white flex flex-col">
+      <div className="w-64 bg-black text-white flex flex-col h-screen">
         <div className="p-6 border-b border-gray-800">
           <h1 className="text-xl font-bold">Siaga Merapi</h1>
           <p className="text-gray-400 text-sm mt-1">Dashboard Admin</p>
@@ -171,23 +143,23 @@ const Dashboard = () => {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-gray-800">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5" />
+        <div className="p-6 border-t border-gray-800">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-white" />
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-gray-400">admin@example.com</p>
-              <button
-                onClick={handleLogout}
-                className="flex items-center px-4 py-2 text-red-500 hover:text-white hover:bg-red-600 rounded transition-colors w-full mt-2"
-              >
-                <LogOut className="w-5 h-5 mr-2" />
-                Logout
-              </button>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-white">Admininstrator</p>
+              <p className="text-xs text-gray-400">admin@merapi.com</p>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="mt-4 w-full flex items-center justify-center px-6 py-2 text-red-500 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            Logout
+          </button>
         </div>
       </div>
 

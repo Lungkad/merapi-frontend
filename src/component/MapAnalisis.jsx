@@ -29,7 +29,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
 const { BaseLayer, Overlay } = LayersControl;
 
-// Coverage Gap Analysis - Spatial distribution analysis without capacity dependency
+// Coverage Gap Analysis - Spatial distribution analysis using heatmap
 const CoverageGapAnalysis = ({
   data,
   map,
@@ -41,48 +41,14 @@ const CoverageGapAnalysis = ({
 
     const layers = [];
 
-    // Create coverage circles and density analysis
-    const coveragePoints = [];
-    const coverageCircles = [];
-
-    data.forEach((barak) => {
-      const lat = parseFloat(barak.latitude);
-      const lng = parseFloat(barak.longitude);
-
-      if (!isNaN(lat) && !isNaN(lng)) {
-        // Add to coverage analysis (equal weight for all baraks)
-        coveragePoints.push([lat, lng, 0.5]); // Standard intensity for all points
-
-        // Create coverage zone circles if enabled
-        if (showCoverageZones) {
-          const circle = L.circle([lat, lng], {
-            radius: serviceRadius,
-            fillColor: "#0066cc",
-            fillOpacity: 0.15,
-            stroke: true,
-            color: "#0044aa",
-            weight: 2,
-            opacity: 0.6,
-          });
-
-          circle.bindPopup(`
-            <strong>${barak.nama_barak}</strong><br/>
-            <strong>Service Radius:</strong> ${(serviceRadius / 1000).toFixed(
-              1
-            )} km<br/>
-            <strong>Kecamatan:</strong> ${barak.kecamatan}<br/>
-            <strong>Desa:</strong> ${barak.desa}<br/>
-            <strong>Coverage Area:</strong> ${(
-              (Math.PI * serviceRadius * serviceRadius) /
-              1000000
-            ).toFixed(2)} km²
-          `);
-
-          circle.addTo(map);
-          coverageCircles.push(circle);
-        }
-      }
-    });
+    // Create coverage heatmap
+    const coveragePoints = data
+      .map((barak) => {
+        const lat = parseFloat(barak.latitude);
+        const lng = parseFloat(barak.longitude);
+        return !isNaN(lat) && !isNaN(lng) ? [lat, lng, 0.7] : null; // Standard intensity
+      })
+      .filter((point) => point !== null);
 
     let heatLayer = null;
 
@@ -93,7 +59,6 @@ const CoverageGapAnalysis = ({
           resolve();
           return;
         }
-
         const script = document.createElement("script");
         script.src =
           "https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js";
@@ -103,30 +68,27 @@ const CoverageGapAnalysis = ({
     };
 
     loadHeatPlugin().then(() => {
-      // Create coverage heatmap
-      const heatLayer = window.L.heatLayer(coveragePoints, {
-        radius: 40,
-        blur: 25,
+      heatLayer = window.L.heatLayer(coveragePoints, {
+        radius: 80,
+        blur: 50,
         maxZoom: 17,
-        max: 1.0,
-        minOpacity: 0.1,
+        max: 1.5,
+        minOpacity: 0.3,
         gradient: {
-          0.0: "#ffffff",
-          0.2: "#ccddff",
-          0.4: "#6699ff",
-          0.6: "#3366cc",
-          0.8: "#1144aa",
-          1.0: "#003388",
+          0.0: "#003366",
+          0.2: "#3366CC",
+          0.4: "#66CC66",
+          0.6: "#FFFF33",
+          0.8: "#FF9933",
+          1.0: "#FF3333",
         },
       });
-
       heatLayer.addTo(map);
       layers.push(heatLayer);
     });
+
     return () => {
       layers.forEach((layer) => map.removeLayer(layer));
-      coverageCircles.forEach((circle) => map.removeLayer(circle));
-      if (heatLayer) map.removeLayer(heatLayer);
     };
   }, [map, data, serviceRadius, showCoverageZones]);
 
@@ -154,12 +116,10 @@ const DistanceRiskAnalysis = ({ data, map }) => {
           merapiLng
         );
 
-        // Distance-only risk calculation
         let riskLevel = "low";
         let riskScore = 0;
         let riskColor = "#00aa00";
 
-        // Distance risk (0-100) - closer = higher risk
         riskScore = Math.max(0, 100 - distanceFromMerapi * 4);
 
         if (riskScore >= 75) {
@@ -176,8 +136,7 @@ const DistanceRiskAnalysis = ({ data, map }) => {
           riskColor = "#00aa00";
         }
 
-        // Create risk visualization circle
-        const radius = 500; // Fixed radius for all baraks
+        const radius = 500;
         const circle = L.circle([lat, lng], {
           radius: radius,
           fillColor: riskColor,
@@ -221,7 +180,6 @@ const MarkerClustering = ({ data, map, showClustering, icon }) => {
   useEffect(() => {
     if (!map || !data?.length || !showClustering) return;
 
-    // Load MarkerCluster plugin
     const loadClusterPlugin = () => {
       return new Promise((resolve) => {
         if (window.L && window.L.MarkerClusterGroup) {
@@ -229,7 +187,6 @@ const MarkerClustering = ({ data, map, showClustering, icon }) => {
           return;
         }
 
-        // Load CSS
         const css = document.createElement("link");
         css.rel = "stylesheet";
         css.href =
@@ -242,7 +199,6 @@ const MarkerClustering = ({ data, map, showClustering, icon }) => {
           "https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css";
         document.head.appendChild(cssDefault);
 
-        // Load JS
         const script = document.createElement("script");
         script.src =
           "https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js";
@@ -252,7 +208,6 @@ const MarkerClustering = ({ data, map, showClustering, icon }) => {
     };
 
     loadClusterPlugin().then(() => {
-      // Create marker cluster group
       const markers = window.L.markerClusterGroup({
         chunkedLoading: true,
         spiderfyOnMaxZoom: true,
@@ -279,7 +234,6 @@ const MarkerClustering = ({ data, map, showClustering, icon }) => {
         },
       });
 
-      // Add markers to cluster group
       data.forEach((barak) => {
         const lat = parseFloat(barak.latitude);
         const lng = parseFloat(barak.longitude);
@@ -323,7 +277,7 @@ const MarkerClustering = ({ data, map, showClustering, icon }) => {
 
 // Helper function untuk menghitung jarak
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; // Earth's radius in km
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -337,7 +291,6 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 };
 
 const CoverageGapAnalysisMain = () => {
-  // State untuk data
   const [baraks, setBaraks] = useState([]);
   const [slemankecData, setSlemankecData] = useState(null);
   const [krbData, setKrbData] = useState(null);
@@ -346,20 +299,17 @@ const CoverageGapAnalysisMain = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // UI States
   const [showSidebar, setShowSidebar] = useState(true);
   const [analysisMode, setAnalysisMode] = useState("coverage");
   const [showLayersControl, setShowLayersControl] = useState(true);
   const [showClustering, setShowClustering] = useState(true);
 
-  // Coverage specific states
   const [serviceRadius, setServiceRadius] = useState(2000);
   const [showCoverageZones, setShowCoverageZones] = useState(true);
 
   const [mapInstance, setMapInstance] = useState(null);
   const [selectedKecamatan, setSelectedKecamatan] = useState("");
 
-  // Fungsi untuk mengambil data barak dari database
   const fetchBaraks = async () => {
     try {
       setLoading(true);
@@ -408,12 +358,10 @@ const CoverageGapAnalysisMain = () => {
     }
   };
 
-  // Load data saat komponen dimount
   useEffect(() => {
     fetchBaraks();
   }, []);
 
-  // Load GeoJSON data
   useEffect(() => {
     const loadGeoJSON = async (url, setter) => {
       try {
@@ -431,17 +379,13 @@ const CoverageGapAnalysisMain = () => {
     loadGeoJSON("/geojson/jalurevakuasi.geojson", setJalurevakuasiData);
   }, []);
 
-  // Coverage gap analysis calculations
   const analysisResults = useMemo(() => {
     if (!baraks.length) return null;
 
     const merapiLat = -7.540585;
     const merapiLng = 110.44638;
 
-    // Distance-based risk analysis
     const riskCategories = { veryHigh: 0, high: 0, medium: 0, low: 0 };
-
-    // Coverage analysis
     let totalCoverageArea = 0;
     const coverageAnalysis = {};
     const distanceAnalysis = {};
@@ -459,7 +403,6 @@ const CoverageGapAnalysisMain = () => {
           merapiLng
         );
 
-        // Distance-based risk calculation
         const riskScore = Math.max(0, 100 - distanceFromMerapi * 4);
 
         if (riskScore >= 75) riskCategories.veryHigh++;
@@ -467,9 +410,8 @@ const CoverageGapAnalysisMain = () => {
         else if (riskScore >= 25) riskCategories.medium++;
         else riskCategories.low++;
 
-        // Coverage analysis
         const coverageArea =
-          (Math.PI * serviceRadius * serviceRadius) / 1000000; // km²
+          (Math.PI * serviceRadius * serviceRadius) / 1000000;
         totalCoverageArea += coverageArea;
 
         if (!coverageAnalysis[kecamatan]) {
@@ -478,7 +420,6 @@ const CoverageGapAnalysisMain = () => {
         coverageAnalysis[kecamatan].count++;
         coverageAnalysis[kecamatan].totalArea += coverageArea;
 
-        // Distance analysis
         if (!distanceAnalysis[kecamatan]) {
           distanceAnalysis[kecamatan] = { distances: [], avgDistance: 0 };
         }
@@ -486,7 +427,6 @@ const CoverageGapAnalysisMain = () => {
       }
     });
 
-    // Calculate distance averages
     Object.keys(distanceAnalysis).forEach((kec) => {
       const distances = distanceAnalysis[kec].distances;
       distanceAnalysis[kec].avgDistance =
@@ -501,25 +441,22 @@ const CoverageGapAnalysisMain = () => {
     };
   }, [baraks, serviceRadius]);
 
-  // Filter baraks berdasarkan kecamatan
   const filteredBaraks = useMemo(() => {
     if (!selectedKecamatan) return baraks;
     return baraks.filter((barak) => barak.kecamatan === selectedKecamatan);
   }, [baraks, selectedKecamatan]);
 
-  // Get unique kecamatan list
   const kecamatanList = useMemo(
     () => [...new Set(baraks.map((b) => b.kecamatan).filter((k) => k))].sort(),
     [baraks]
   );
 
-  // Custom icons
   const barakIcon = new L.AwesomeMarkers.icon({
-      icon: "tent", // Font Awesome tent icon
-      prefix: "fa", // Font Awesome prefix
-      markerColor: "green", // Marker color
-      iconColor: "black", // Icon color
-    });
+    icon: "tent",
+    prefix: "fa",
+    markerColor: "green",
+    iconColor: "black",
+  });
 
   const merapiIcon = new L.Icon({
     iconUrl:
@@ -534,7 +471,6 @@ const CoverageGapAnalysisMain = () => {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
-      {/* Header */}
       <div className="fixed top-0 left-0 w-full z-20 bg-black/80 bg-opacity-50 backdrop-blur-md border-b border-red-500/20">
         <div className="flex justify-between items-center px-6 py-4">
           <div className="flex items-center space-x-3">
@@ -544,21 +480,18 @@ const CoverageGapAnalysisMain = () => {
             <span className="text-white font-bold text-xl">SiagaMerapi</span>
           </div>
 
-        <nav className="hidden md:flex gap-8 text-white font-medium">
-            <a
-              href="/"
-              className="hover:text-red-400 transition-colors"
-            >
-              Home
+          <nav className="hidden md:flex gap-8 text-white font-medium">
+            <a href="/" className="hover:text-red-400 transition-colors">
+              Beranda
             </a>
             <a
               href="/merapiintro"
               className="hover:text-red-400 transition-colors"
             >
-              Introduction
+              Tentang
             </a>
             <a href="/maps" className="text-red-400 border-b-2 border-red-400">
-              Maps
+              Peta
             </a>
             <a
               href="/information"
@@ -566,34 +499,35 @@ const CoverageGapAnalysisMain = () => {
             >
               Mitigasi
             </a>
-            <a
-              href="/beritas"
-              className="hover:text-red-400 transition-colors"
-            >
-              News
+            <a href="/beritas" className="hover:text-red-400 transition-colors">
+              Berita
             </a>
           </nav>
 
-        <div className="flex items-center gap-4">
-          <a
-            href="/mapsbarak"
-            className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Kembali ke Maps
-          </a>
-          <button
-            onClick={() => setShowSidebar(!showSidebar)}
-            className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors md:hidden"
-          >
-            <Menu className="w-5 h-5 text-white" />
-          </button>
+          <div className="flex items-center gap-4">
+            <a
+              href="/mapsbarak"
+              className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Kembali ke Maps
+            </a>
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors md:hidden"
+            >
+              <Menu className="w-5 h-5 text-white" />
+            </button>
+          </div>
         </div>
       </div>
-      </div>
 
-      {/* Sidebar */}
-      <div className={`fixed top-20 left-0 w-80 bg-white shadow-2xl z-20 transition-transform duration-300 ${showSidebar ? "translate-x-0" : "-translate-x-full"} overflow-y-auto`} style={{ height: 'calc(100vh - 5rem)' }}>
+      <div
+        className={`fixed top-20 left-0 w-80 bg-white shadow-2xl z-20 transition-transform duration-300 ${
+          showSidebar ? "translate-x-0" : "-translate-x-full"
+        } overflow-y-auto`}
+        style={{ height: "calc(100vh - 5rem)" }}
+      >
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-800">
@@ -607,7 +541,6 @@ const CoverageGapAnalysisMain = () => {
             </button>
           </div>
 
-          {/* Analysis Mode Selection */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Mode Analisis
@@ -622,7 +555,6 @@ const CoverageGapAnalysisMain = () => {
             </select>
           </div>
 
-          {/* Clustering Control */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <label className="flex items-center gap-2">
               <input
@@ -631,13 +563,10 @@ const CoverageGapAnalysisMain = () => {
                 onChange={(e) => setShowClustering(e.target.checked)}
                 className="rounded"
               />
-              <span className="text-sm text-gray-700">
-                Marker Clustering
-              </span>
+              <span className="text-sm text-gray-700">Marker Clustering</span>
             </label>
           </div>
 
-          {/* Kecamatan Filter */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Filter Kecamatan
@@ -656,7 +585,6 @@ const CoverageGapAnalysisMain = () => {
             </select>
           </div>
 
-          {/* Analysis Results */}
           {analysisResults && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
@@ -746,13 +674,16 @@ const CoverageGapAnalysisMain = () => {
                         </h4>
                         <div className="text-xs space-y-1">
                           <div>
-                            • Area dengan cakupan yang tumpang tindih dapat mengindikasikan adanya surplus barak
+                            • Area dengan cakupan yang tumpang tindih dapat
+                            mengindikasikan adanya surplus barak
                           </div>
                           <div>
-                            • Area tanpa cakupan menunjukkan potensi kesenjangan barak
+                            • Area tanpa cakupan menunjukkan potensi kesenjangan
+                            barak
                           </div>
                           <div>
-                            • Pertimbangkan distribusi barak yang optimal untuk cakupan maksimum
+                            • Pertimbangkan distribusi barak yang optimal untuk
+                            cakupan maksimum
                           </div>
                         </div>
                       </div>
@@ -812,7 +743,7 @@ const CoverageGapAnalysisMain = () => {
 
                       <div className="space-y-2">
                         <h4 className="font-medium text-gray-700">
-                         Rerata Jarak ke Merapi:
+                          Rerata Jarak ke Merapi:
                         </h4>
                         {Object.entries(analysisResults.distanceAnalysis)
                           .sort((a, b) => a[1].avgDistance - b[1].avgDistance)
@@ -847,7 +778,6 @@ const CoverageGapAnalysisMain = () => {
         </div>
       </div>
 
-      {/* Map */}
       <div
         className={`absolute top-20 bottom-0 right-0 transition-all duration-300 ${
           showSidebar ? "left-80" : "left-0"
@@ -864,7 +794,6 @@ const CoverageGapAnalysisMain = () => {
 
           {showLayersControl && (
             <LayersControl position="topright">
-              {/* Base Layers */}
               <BaseLayer checked name="OpenStreetMap">
                 <TileLayer
                   attribution="&copy; OpenStreetMap contributors"
@@ -886,7 +815,6 @@ const CoverageGapAnalysisMain = () => {
                 />
               </BaseLayer>
 
-              {/* GeoJSON Overlays */}
               {slemankecData && (
                 <Overlay checked name="Kecamatan">
                   <GeoJSON
@@ -934,7 +862,6 @@ const CoverageGapAnalysisMain = () => {
             </LayersControl>
           )}
 
-          {/* Default base layer */}
           {!showLayersControl && (
             <TileLayer
               attribution="&copy; OpenStreetMap contributors"
@@ -942,7 +869,6 @@ const CoverageGapAnalysisMain = () => {
             />
           )}
 
-          {/* Merapi marker */}
           <Marker position={[-7.540585, 110.44638]} icon={merapiIcon}>
             <Popup>
               <div className="text-sm">
@@ -957,7 +883,6 @@ const CoverageGapAnalysisMain = () => {
             </Popup>
           </Marker>
 
-          {/* Analysis layers based on mode */}
           {analysisMode === "coverage" && mapInstance && (
             <CoverageGapAnalysis
               data={filteredBaraks}
@@ -971,7 +896,6 @@ const CoverageGapAnalysisMain = () => {
             <DistanceRiskAnalysis data={filteredBaraks} map={mapInstance} />
           )}
 
-          {/* Marker clustering */}
           {mapInstance && (
             <MarkerClustering
               data={filteredBaraks}
@@ -981,7 +905,6 @@ const CoverageGapAnalysisMain = () => {
             />
           )}
 
-          {/* Regular markers when clustering is disabled */}
           {!showClustering &&
             filteredBaraks
               .filter((barak) => {
@@ -1028,18 +951,24 @@ const CoverageGapAnalysisMain = () => {
             {analysisMode === "coverage" && (
               <>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-blue-500 opacity-60"></div>
-                  <span>Coverage Zone</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-2 bg-gradient-to-r from-white via-blue-300 to-blue-800"></div>
-                  <span>Coverage Density</span>
+                  <div className="w-8 h-2 bg-gradient-to-r from-[#003366] via-[#3366CC] via-[#66CC66] via-[#FFFF33] via-[#FF9933] to-[#FF3333]"></div>
+                  <span>Densitas Cakupan</span>
                 </div>
                 <div className="text-gray-600 mt-2">
-                  • Area yang lebih gelap = Kepadatan cakupan yang lebih tinggi
-                  <br />
-                  • Area putih = Gaps antar cakupan
-                  <br />• Lingkaran overlaps = Potensi kelebihan
+                  • <span style={{ color: "#003366" }}>Biru Gelap</span>:
+                  Densitas terendah (0.0)
+                  <br />• <span style={{ color: "#3366CC" }}>Biru Sedang</span>:
+                  Densitas rendah (0.2)
+                  <br />• <span style={{ color: "#66CC66" }}>Hijau</span>:
+                  Densitas moderat (0.4)
+                  <br />• <span style={{ color: "#FFFF33" }}>Kuning</span>:
+                  Densitas tinggi (0.6)
+                  <br />• <span style={{ color: "#FF9933" }}>Oranye</span>:
+                  Densitas sangat tinggi (0.8)
+                  <br />• <span style={{ color: "#FF3333" }}>Merah</span>:
+                  Densitas tertinggi (1.0)
+                  <br /> <br />Area yang lebih gelap menunjukkan konsentrasi barak
+                  yang lebih tinggi; area yang lebih terang menunjukkan celah
                 </div>
               </>
             )}

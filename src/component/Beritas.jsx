@@ -125,28 +125,19 @@ const Beritas = () => {
 
           <nav className="hidden md:flex gap-8 text-white font-medium">
             <a href="/" className="hover:text-red-400 transition-colors">
-              Home
+              Beranda
             </a>
-            <a
-              href="/merapiintro"
-              className="hover:text-red-400 transition-colors"
-            >
-              Introduction
+            <a href="/merapiintro" className="hover:text-red-400 transition-colors">
+              Tentang
             </a>
             <a href="/mapsbarak" className="hover:text-red-400 transition-colors">
-              Maps
+              Peta
             </a>
-            <a
-              href="/information"
-              className="hover:text-red-400 transition-colors"
-            >
+            <a href="/information"  className="hover:text-red-400 transition-colors">
               Mitigasi
             </a>
-            <a
-              href="beritas"
-              className="text-red-400 border-b-2 border-red-400"
-            >
-              News
+            <a href="/berita" className="text-red-400 border-b-2 border-red-400 ">
+              Berita
             </a>
           </nav>
 
@@ -200,7 +191,7 @@ const Beritas = () => {
                 className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
               />
             </div>
-            <button
+            {/* <button
               onClick={() => setFilterActive(!filterActive)}
               className={`flex items-center space-x-2 px-6 py-3 rounded-xl transition-all font-medium ${
                 filterActive
@@ -210,7 +201,7 @@ const Beritas = () => {
             >
               <Filter className="w-5 h-5" />
               <span>Filter</span>
-            </button>
+            </button> */}
           </div>
         </div>
 

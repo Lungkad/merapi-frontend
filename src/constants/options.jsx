@@ -106,4 +106,11 @@ const desaOptions = [
     "Turi",
   ];
 
-export { desaOptions, kecamatanOptions };
+  const bangunanOptions = [
+    "Barak Evakuasi",
+    "Fasilitas Pendidikan",
+    "Kantor Pemerintahan",
+    "Fasilitas Olahraga",
+  ];
+
+export { desaOptions, kecamatanOptions, bangunanOptions };

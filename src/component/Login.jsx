@@ -70,7 +70,7 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Admin Login
+            SiagaMerapi
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Masuk sebagai administrator sistem
@@ -137,13 +137,13 @@ const Login = () => {
             </button>
           </div>
 
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          {/* <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <h4 className="text-sm font-medium text-yellow-800">Kredensial Default:</h4>
             <p className="text-sm text-yellow-700 mt-1">
               Email: <span className="font-mono">admin@merapi.com</span><br />
               Password: <span className="font-mono">123</span>
             </p>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>

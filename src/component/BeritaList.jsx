@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, Tent, Newspaper, PanelBottom } from "lucide-react";
+import {
+  TrendingUp,
+  Tent,
+  Newspaper,
+  PanelBottom,
+  User,
+  LogOut,
+} from "lucide-react";
 import { beritaAPI } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const BeritaList = () => {
   const [beritas, setBeritas] = useState([]);
@@ -10,6 +18,7 @@ const BeritaList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState(null);
   const [alert, setAlert] = useState(null);
+  const { logout } = useAuth();
 
   const navigate = useNavigate();
   const activeTab = "beritalist"; // Hardcoded for this component
@@ -34,6 +43,10 @@ const BeritaList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   const handleDelete = async (id) => {
@@ -118,19 +131,27 @@ const BeritaList = () => {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-gray-800">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-sm font-semibold">A</span>
+        <div className="p-6 border-t border-gray-800">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-white" />
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-gray-400">admin@example.com</p>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-white">Admininstrator</p>
+              <p className="text-xs text-gray-400">admin@merapi.com</p>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="mt-4 w-full flex items-center justify-center px-6 py-2 text-red-500 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            Logout
+          </button>
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="flex-1 p-6 overflow-auto">
         {alert && (
           <div
@@ -141,7 +162,10 @@ const BeritaList = () => {
             }`}
           >
             {alert.message}
-            <button onClick={() => setAlert(null)} className="float-right font-bold">
+            <button
+              onClick={() => setAlert(null)}
+              className="float-right font-bold"
+            >
               ×
             </button>
           </div>
@@ -163,32 +187,69 @@ const BeritaList = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Summary</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link Berita</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Judul
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Gambar
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Summary
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Link Berita
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Aksi
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {beritas.map((berita, index) => (
                     <tr key={berita.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(currentPage - 1) * 10 + index + 1}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{berita.judul_berita}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <img src={berita.gambar_berita} alt={berita.judul_berita} className="w-20 h-20 object-cover" />
+                        {(currentPage - 1) * 10 + index + 1}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{berita.ringkasan_berita}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        <a href={berita.url_berita} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-900">
+                        {berita.judul_berita}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <img
+                          src={berita.gambar_berita}
+                          alt={berita.judul_berita}
+                          className="w-20 h-20 object-cover"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {berita.ringkasan_berita}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        <a
+                          href={berita.url_berita}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-900"
+                        >
                           Lihat Berita
                         </a>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          <Link to={`/beritaform/${berita.id}`} className="text-yellow-600 hover:text-yellow-900">Edit</Link>
-                          <button onClick={() => handleDelete(berita.id)} className="text-red-600 hover:text-red-900">Hapus</button>
+                          <Link
+                            to={`/beritas/${berita.id}/edit`}
+                            className="text-yellow-600 hover:text-yellow-900"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(berita.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Hapus
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -231,7 +292,9 @@ const BeritaList = () => {
                             )}
                           </span>{" "}
                           of{" "}
-                          <span className="font-medium">{pagination.total}</span>{" "}
+                          <span className="font-medium">
+                            {pagination.total}
+                          </span>{" "}
                           results
                         </p>
                       </div>

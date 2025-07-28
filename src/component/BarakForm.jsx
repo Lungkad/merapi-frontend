@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { barakAPI } from "../services/api";
-import { desaOptions, kecamatanOptions } from "../constants/options";
+import { desaOptions, kecamatanOptions, bangunanOptions } from "../constants/options";
 
 import {
   MapContainer,
@@ -16,6 +16,7 @@ const BarakForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nama_barak: "",
+    tipe_bangunan: "",
     kapasitas: "",
     fasilitas: "",
     alamat: "",
@@ -136,6 +137,35 @@ const BarakForm = () => {
               <p className="text-red-500 text-sm mt-1">
                 {errors.nama_barak[0]}
               </p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="tipe_bangunan"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Tipe Bangunan
+            </label>
+            <input
+              list="bangunan-list"
+              id="tipe_bangunan"
+              name="tipe_bangunan"
+              value={formData.tipe_bangunan}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.tipe_bangunan ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="Ketik atau pilih tipe bangunan"
+              required
+            />
+            <datalist id="bangunan-list">
+              {bangunanOptions.map((option, i) => (
+                <option key={i} value={option} />
+              ))}
+            </datalist>
+            {errors.tipe_bangunan && (
+              <p className="text-red-500 text-sm mt-1">{errors.tipe_bangunan[0]}</p>
             )}
           </div>
 

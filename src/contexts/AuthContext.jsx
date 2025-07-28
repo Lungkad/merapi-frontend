@@ -87,6 +87,7 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove('auth_token');
       setUser(null);
       setIsAuthenticated(false);
+      window.location.href = '/';
     }
   };
 

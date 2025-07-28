@@ -48,7 +48,7 @@ export const authAPI = {
 
 export const barakAPI = {
   // Get all baraks with pagination
-  getAll: (page = 1, order = 'desc', perPage = 15) =>
+  getAll: (page = 1, order = 'desc', perPage = 10) =>
     api.get(`/baraks?page=${page}&sort_by=id&order=${order}&per_page=${perPage}`),
   
   // Get ALL baraks without pagination (if backend supports it)

@@ -88,25 +88,19 @@ const MerapiIntro = () => {
 
           <nav className="hidden md:flex gap-8 text-white font-medium">
             <a href="/" className="hover:text-red-400 transition-colors">
-              Home
+              Beranda
             </a>
-            <a
-              href="/merapiintro"
-              className="text-red-400 border-b-2 border-red-400"
-            >
-              Introduction
+            <a href="/merapiintro" className="text-red-400 border-b-2 border-red-400 ">
+              Tentang
             </a>
             <a href="/mapsbarak" className="hover:text-red-400 transition-colors">
-              Maps
+              Peta
             </a>
-            <a
-              href="/information"
-              className="hover:text-red-400 transition-colors"
-            >
+            <a href="/information"  className="hover:text-red-400 transition-colors">
               Mitigasi
             </a>
-            <a href="beritas" className="hover:text-red-400 transition-colors">
-              News
+            <a href="/berita" className="hover:text-red-400 transition-colors">
+              Berita
             </a>
           </nav>
 
@@ -344,7 +338,7 @@ const MerapiIntro = () => {
         {/* Footer Info */}
         <div className="bg-gray-900 py-8 px-6 text-center">
           <p className="text-gray-400">
-            Data dan informasi bekerjasama dengan PVMBG, BNPB, dan institusi terkait
+            Data dan informasi diambil dari jurnal-jurnal tekait dan data resmi BPBD Sleman.
           </p>
         </div>
       </div>
