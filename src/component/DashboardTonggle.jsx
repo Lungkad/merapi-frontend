@@ -25,7 +25,7 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("dbtoggle");
   const { logout } = useAuth();
 
   // Fungsi untuk menampilkan notifikasi
