@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -59,41 +53,6 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// GraphHopper Configuration
-const GRAPHHOPPER_CONFIG = {
-  API_KEY: "36cb51ca-a3a3-43ca-a1c2-c34e784c7509",
-
-  BASE_URL: "https://graphhopper.com/api/1/route",
-
-  // Enhanced settings available with API key
-  SETTINGS: {
-    vehicle: "car",
-    locale: "id",
-    optimize: "true",
-    instructions: "true",
-    calc_points: "true",
-    debug: "false",
-    elevation: "false",
-    points_encoded: "false",
-    type: "json",
-
-    // Advanced routing options (API key required)
-    algorithm: "dijkstra",
-    heading_penalty: "120",
-    point_hint: "",
-    // Traffic and road preferences (API key required)
-    avoid: "",
-    block_area: "",
-
-    // Alternative routes (API key required)
-    alternative_route: {
-      max_paths: "2",
-      max_weight_factor: "1.4",
-      max_share_factor: "0.6",
-    },
-  },
-};
-
 const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
   const map = useMap();
   const [routeCoordinates, setRouteCoordinates] = useState([]);
@@ -101,7 +60,6 @@ const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
   const [isLoading, setIsLoading] = useState(false);
   const abortControllerRef = useRef(null);
 
-  // CRITICAL FIX: Use refs to prevent infinite loops
   const lastRequestRef = useRef(null);
   const routeFoundRef = useRef(false);
 
@@ -115,22 +73,18 @@ const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
       return;
     }
 
-    // CRITICAL FIX: Create a unique key for this request
     const requestKey = `${start.lat},${start.lng}-${end.lat},${end.lng}`;
 
-    // CRITICAL FIX: Don't make the same request twice
     if (lastRequestRef.current === requestKey && routeFoundRef.current) {
       console.log("🔄 Skipping duplicate request for:", requestKey);
       return;
     }
 
-    // CRITICAL FIX: Don't start new request if already loading the same route
     if (isLoading && lastRequestRef.current === requestKey) {
       console.log("⏳ Already loading this route, skipping...");
       return;
     }
 
-    // Cancel any ongoing request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -208,7 +162,6 @@ const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
           coord[0],
         ]);
 
-        // CRITICAL FIX: Only update state if this is still the current request
         if (
           lastRequestRef.current === requestKey &&
           !abortControllerRef.current.signal.aborted
@@ -248,7 +201,6 @@ const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
             service: "OSRM",
           };
 
-          // CRITICAL FIX: Use callback to prevent dependency issues
           setTimeout(() => {
             if (
               lastRequestRef.current === requestKey &&
@@ -281,7 +233,6 @@ const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
 
         console.error("❌ Routing failed for:", requestKey, error);
 
-        // CRITICAL FIX: Only update state if this is still the current request
         if (
           lastRequestRef.current === requestKey &&
           !abortControllerRef.current.signal.aborted
@@ -290,14 +241,12 @@ const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
           setAlternativeRoutes([]);
           routeFoundRef.current = false;
 
-          // CRITICAL FIX: Use callback to prevent dependency issues
           setTimeout(() => {
             if (lastRequestRef.current === requestKey) {
               onRouteClear();
             }
           }, 0);
 
-          // Enhanced error messages
           let userMessage = "Gagal menghitung rute. ";
 
           if (
@@ -323,14 +272,12 @@ const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
           alert(userMessage);
         }
       } finally {
-        // CRITICAL FIX: Only update loading state if this is still the current request
         if (lastRequestRef.current === requestKey) {
           setIsLoading(false);
         }
       }
     };
 
-    // CRITICAL FIX: Add delay to prevent rapid successive requests
     const timeoutId = setTimeout(fetchRoute, 800);
 
     return () => {
@@ -338,17 +285,9 @@ const GraphHopperRouting = ({ start, end, onRouteFound, onRouteClear }) => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-      // DON'T reset state in cleanup to prevent flicker
     };
-  }, [
-    // CRITICAL FIX: Use JSON.stringify to ensure proper comparison of objects
-    JSON.stringify(start),
-    JSON.stringify(end),
-    map,
-    // REMOVED: onRouteFound and onRouteClear from dependencies to prevent loops
-  ]);
+  }, [JSON.stringify(start), JSON.stringify(end), map]);
 
-  // CRITICAL FIX: Separate cleanup effect
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
@@ -452,11 +391,15 @@ const MapsBarak = () => {
   // State untuk data
   const [baraks, setBaraks] = useState([]);
   const [filteredBaraks, setFilteredBaraks] = useState([]);
-  const [krbData, setKrbData] = useState(null);
   const [jalurevakuasiData, setJalurevakuasiData] = useState(null);
   const [jarakmerapiData, setJarakmerapiData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [geoJsonLoading, setGeoJsonLoading] = useState({
+    jalurevakuasi: true,
+    jarakmerapi: true,
+  });
 
   // UI States
   const [showSidebar, setShowSidebar] = useState(true);
@@ -696,27 +639,13 @@ const MapsBarak = () => {
   };
 
   // Handle route found with error checking
-  const handleRouteFound = useCallback((info) => {
-    console.log("📍 Route info received:", info);
+  const handleRouteFound = (info) => {
     setRouteInfo(info);
-  }, []);
+  };
 
-  const handleRouteClear = useCallback(() => {
-    console.log("🧹 Route cleared");
+  const handleRouteClear = () => {
     setRouteInfo(null);
-  }, []);
-
-  const memoizedNavigationTarget = useMemo(() => {
-    return navigationTarget;
-  }, [
-    navigationTarget?.lat,
-    navigationTarget?.lng,
-    navigationTarget?.barak?.id,
-  ]);
-
-  const memoizedUserLocation = useMemo(() => {
-    return userLocation;
-  }, [userLocation?.lat, userLocation?.lng]);
+  };
 
   // Stop navigation with proper cleanup
   const stopNavigation = () => {
@@ -796,18 +725,109 @@ const MapsBarak = () => {
 
   // Load GeoJSON data
   useEffect(() => {
-    const loadGeoJSON = async (url, setter) => {
+    let isMounted = true;
+
+    const loadGeoJSONOptimized = async () => {
       try {
-        const response = await fetch(url);
-        const data = await response.json();
-        setter(data);
+        console.log("🗺️ Starting optimized GeoJSON loading...");
+
+        // Load jalur evakuasi terlebih dahulu (prioritas tinggi)
+        setTimeout(async () => {
+          if (!isMounted) return;
+
+          try {
+            console.log("📍 Loading jalur evakuasi...");
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 detik timeout
+
+            const response = await fetch("/geojson/jalurevakuasi.geojson", {
+              signal: controller.signal,
+              headers: {
+                "Cache-Control": "public, max-age=3600", // Cache 1 jam
+              },
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok && isMounted) {
+              const data = await response.json();
+
+              // Validasi data sebelum set
+              if (
+                data &&
+                (data.features || data.type === "FeatureCollection")
+              ) {
+                setJalurevakuasiData(data);
+                console.log("✅ Jalur evakuasi loaded successfully");
+              } else {
+                console.warn("⚠️ Invalid jalur evakuasi data format");
+              }
+            } else if (response.status === 404) {
+              console.warn("⚠️ Jalur evakuasi file not found");
+            }
+          } catch (error) {
+            if (error.name !== "AbortError") {
+              console.error("❌ Failed to load jalur evakuasi:", error.message);
+            }
+          }
+        }, 1000); // Delay 1 detik
+
+        // Load jarak merapi setelah jalur evakuasi (prioritas rendah)
+        setTimeout(async () => {
+          if (!isMounted) return;
+
+          try {
+            console.log("🌋 Loading jarak merapi...");
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+            const response = await fetch("/geojson/jarak_merapi.geojson", {
+              signal: controller.signal,
+              headers: {
+                "Cache-Control": "public, max-age=3600",
+              },
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok && isMounted) {
+              const data = await response.json();
+
+              // Validasi data
+              if (
+                data &&
+                (data.features || data.type === "FeatureCollection")
+              ) {
+                setJarakmerapiData(data);
+                console.log("✅ Jarak merapi loaded successfully");
+              } else {
+                console.warn("⚠️ Invalid jarak merapi data format");
+              }
+            } else if (response.status === 404) {
+              console.warn("⚠️ Jarak merapi file not found");
+            }
+          } catch (error) {
+            if (error.name !== "AbortError") {
+              console.error("❌ Failed to load jarak merapi:", error.message);
+            }
+          }
+        }, 3000); // Delay 3 detik (setelah jalur evakuasi)
       } catch (error) {
-        console.error(`Error loading ${url}:`, error);
+        console.error("❌ GeoJSON loading error:", error);
       }
     };
-    loadGeoJSON("/geojson/jalurevakuasi.geojson", setJalurevakuasiData);
-    loadGeoJSON("/geojson/jarak_merapi.geojson", setJarakmerapiData);
-  }, []);
+
+    // Tunggu sampai map ready baru load GeoJSON
+    const mapReadyTimer = setTimeout(() => {
+      loadGeoJSONOptimized();
+    }, 2000);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      clearTimeout(mapReadyTimer);
+    };
+  }, []); // Empty dependency array
 
   // Custom icon for barak markers using Leaflet Awesome Markers
   const buildingIcons = {
@@ -967,7 +987,7 @@ const MapsBarak = () => {
               className="text-red-400 py-2 border-b border-gray-700"
               onClick={() => setShowMobileMenu(false)}
             >
-              Peta  
+              Peta
             </a>
             <a
               href="/information"
@@ -1277,6 +1297,14 @@ const MapsBarak = () => {
           width: showSidebar ? "calc(100% - 320px)" : "100%",
         }}
       >
+        {(geoJsonLoading.jalurevakuasi || geoJsonLoading.jarakmerapi) && (
+          <div className="fixed top-24 left-4 z-[90] bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+              <span>Loading peta...</span>
+            </div>
+          </div>
+        )}
         <MapContainer
           center={[-7.674246017544997, 110.39503800761653]}
           zoom={12}
