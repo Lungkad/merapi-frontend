@@ -9,8 +9,6 @@ import {
   LayersControl,
 } from "react-leaflet";
 import {
-  TrendingUp,
-  Layers,
   Activity,
   Map,
   Menu,
@@ -303,6 +301,7 @@ const CoverageGapAnalysisMain = () => {
   const [analysisMode, setAnalysisMode] = useState("coverage");
   const [showLayersControl, setShowLayersControl] = useState(true);
   const [showClustering, setShowClustering] = useState(true);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const [serviceRadius, setServiceRadius] = useState(2000);
   const [showCoverageZones, setShowCoverageZones] = useState(true);
@@ -471,15 +470,19 @@ const CoverageGapAnalysisMain = () => {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
-      <div className="fixed top-0 left-0 w-full z-20 bg-black/80 bg-opacity-50 backdrop-blur-md border-b border-red-500/20">
-        <div className="flex justify-between items-center px-6 py-4">
+      {/* Header */}
+      <div className="fixed top-0 left-0 w-full z-[100] bg-black/80 bg-opacity-50 backdrop-blur-md border-b border-red-500/20">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center">
               <img src={logo} alt="Logo" className="w-6 h-9" />
             </div>
-            <span className="text-white font-bold text-xl">SiagaMerapi</span>
+            <span className="text-white font-bold text-lg sm:text-xl">
+              SiagaMerapi
+            </span>
           </div>
 
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-8 text-white font-medium">
             <a href="/" className="hover:text-red-400 transition-colors">
               Beranda
@@ -490,7 +493,10 @@ const CoverageGapAnalysisMain = () => {
             >
               Tentang
             </a>
-            <a href="/maps" className="text-red-400 border-b-2 border-red-400">
+            <a
+              href="/mapsbarak"
+              className="text-red-400 border-b-2 border-red-400"
+            >
               Peta
             </a>
             <a
@@ -499,31 +505,94 @@ const CoverageGapAnalysisMain = () => {
             >
               Mitigasi
             </a>
-            <a href="/beritas" className="hover:text-red-400 transition-colors">
+            <a href="/berita" className="hover:text-red-400 transition-colors">
               Berita
             </a>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <a
               href="/mapsbarak"
-              className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white text-sm"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white text-sm sm:text-base"
             >
               <ArrowLeft className="w-4 h-4" />
-              Kembali ke Maps
             </a>
+
             <button
               onClick={() => setShowSidebar(!showSidebar)}
-              className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors md:hidden"
+              className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              title="Toggle Sidebar"
             >
-              <Menu className="w-5 h-5 text-white" />
+              {showSidebar ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <Activity className="w-5 h-5 text-white" />
+              )}
+            </button>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors md:hidden"
+              title="Toggle Menu"
+            >
+              {showMobileMenu ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <Menu className="w-5 h-5 text-white" />
+              )}
             </button>
           </div>
         </div>
+        {/* Mobile Navigation Menu */}
+        <div
+          className={`md:hidden bg-black/90 backdrop-blur-md border-t border-red-500/20 transition-all duration-300 overflow-hidden z-[100] ${
+            showMobileMenu ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <nav className="flex flex-col px-4 py-4 space-y-3">
+            <a
+              href="/"
+              className="text-white hover:text-red-400 transition-colors py-2 border-b border-gray-700"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Beranda
+            </a>
+            <a
+              href="/merapiintro"
+              className="text-white hover:text-red-400 transition-colors py-2 border-b border-gray-700"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Tentang
+            </a>
+            <a
+              href="/mapsbarak"
+              className="text-red-400 py-2 border-b border-gray-700"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Peta
+            </a>
+            <a
+              href="/information"
+              className="text-white hover:text-red-400 transition-colors py-2 border-b border-gray-700"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Mitigasi
+            </a>
+            <a
+              href="/berita"
+              className="text-white hover:text-red-400 transition-colors py-2"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Berita
+            </a>
+          </nav>
+        </div>
       </div>
 
+      {/* Sidebar */}
       <div
-        className={`fixed top-20 left-0 w-80 bg-white shadow-2xl z-20 transition-transform duration-300 ${
+        className={`fixed top-20 left-0 w-80 max-w-full bg-white shadow-2xl z-50 transition-transform duration-300 ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
         } overflow-y-auto`}
         style={{ height: "calc(100vh - 5rem)" }}
@@ -778,10 +847,15 @@ const CoverageGapAnalysisMain = () => {
         </div>
       </div>
 
+      {/* Map */}
       <div
-        className={`absolute top-20 bottom-0 right-0 transition-all duration-300 ${
+        className={`absolute top-20 bottom-0 right-0 transition-all duration-300 z-10 ${
           showSidebar ? "left-80" : "left-0"
         }`}
+        style={{
+          left: showSidebar ? "320px" : "0",
+          width: showSidebar ? "calc(100% - 320px)" : "100%",
+        }}
       >
         <MapContainer
           center={[-7.797068, 110.370529]}
@@ -967,8 +1041,9 @@ const CoverageGapAnalysisMain = () => {
                   Densitas sangat tinggi (0.8)
                   <br />• <span style={{ color: "#FF3333" }}>Merah</span>:
                   Densitas tertinggi (1.0)
-                  <br /> <br />Area yang lebih gelap menunjukkan konsentrasi barak
-                  yang lebih tinggi; area yang lebih terang menunjukkan celah
+                  <br /> <br />
+                  Area yang lebih gelap menunjukkan konsentrasi barak yang lebih
+                  tinggi; area yang lebih terang menunjukkan celah
                 </div>
               </>
             )}

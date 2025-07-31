@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {Menu, X} from "lucide-react";
 import logo from "../assets/logo.png";
 import StatusIndicator from "./StatusIndicator";
 
 const MerapiIntro = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,10 +19,19 @@ const MerapiIntro = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
     window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleResize);
+    
     return () => {
       clearInterval(timer);
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -73,10 +84,19 @@ const MerapiIntro = () => {
     }
   ];
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleNavClick = (href) => {
+    setIsMobileMenuOpen(false);
+    
+  };
+
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
       <StatusIndicator />
-      {/* Fixed Navigation - Tetap tidak berubah */}
+      {/* Navigation */}
       <div className="fixed top-0 left-0 w-full z-20 bg-black/80 bg-opacity-50 backdrop-blur-md border-b border-red-500/20">
         <div className="flex justify-between items-center px-6 py-4">
           <div className="flex items-center space-x-3">
@@ -86,40 +106,109 @@ const MerapiIntro = () => {
             <span className="text-white font-bold text-xl">SiagaMerapi</span>
           </div>
 
-          <nav className="hidden md:flex gap-8 text-white font-medium">
-            <a href="/" className="hover:text-red-400 transition-colors">
-              Beranda
-            </a>
-            <a href="/merapiintro" className="text-red-400 border-b-2 border-red-400 ">
-              Tentang
-            </a>
-            <a href="/mapsbarak" className="hover:text-red-400 transition-colors">
-              Peta
-            </a>
-            <a href="/information"  className="hover:text-red-400 transition-colors">
-              Mitigasi
-            </a>
-            <a href="/berita" className="hover:text-red-400 transition-colors">
-              Berita
-            </a>
-          </nav>
+          {/* Desktop Navigation */}
+                    <nav className="hidden lg:flex gap-6 xl:gap-8 text-white font-medium">
+                      <a href="/" className="hover:text-red-400 transition-colors pb-1">
+                        Beranda
+                      </a>
+                      <a href="/merapiintro" className="text-red-400 border-b-2 border-red-400 pb-1">
+                        Tentang
+                      </a>
+                      <a href="/mapsbarak" className="hover:text-red-400 transition-colors pb-1">
+                        Peta
+                      </a>
+                      <a href="/information" className="hover:text-red-400 transition-colors pb-1">
+                        Mitigasi
+                      </a>
+                      <a href="/berita" className="hover:text-red-400 transition-colors pb-1">
+                        Berita
+                      </a>
+                    </nav>
+          
+                    {/* Right Section - Time & Login */}
+                    <div className="flex items-center gap-2 sm:gap-4">
+                      {/* Time Display - Hidden on very small screens */}
+                      <div className="text-white text-right text-xs sm:text-sm hidden md:block">
+                        <div className="font-medium">{date}</div>
+                        <div className="text-gray-300">{time}</div>
+                      </div>
+                      
+                      {/* Login Button */}
+                      <a
+                        href="/dashboard"
+                        className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium text-sm sm:text-base hover:from-orange-600 hover:to-red-700 transition-all shadow-lg"
+                      >
+                        Login
+                      </a>
+          
+                      {/* Mobile Menu Button */}
+                      <button
+                        onClick={toggleMobileMenu}
+                        className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        aria-label="Toggle mobile menu"
+                      >
+                        {isMobileMenuOpen ? (
+                          <X className="w-6 h-6" />
+                        ) : (
+                          <Menu className="w-6 h-6" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+          
+                  {/* Mobile Navigation Menu */}
+                  <div className={`lg:hidden transition-all duration-300 ease-in-out ${
+                    isMobileMenuOpen 
+                      ? 'max-h-96 opacity-100' 
+                      : 'max-h-0 opacity-0 overflow-hidden'
+                  }`}>
+                    <nav className="px-4 pb-4 space-y-2 bg-black/60 backdrop-blur-sm border-t border-white/10">
+                      {/* Time Display for Mobile */}
+                      <div className="md:hidden text-white text-center text-sm py-3 border-b border-white/10">
+                        <div className="font-medium">{date}</div>
+                        <div className="text-gray-300">{time}</div>
+                      </div>
+                      
+                      <a 
+                        href="/" 
+                        onClick={() => handleNavClick("/")}
+                        className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+                      >
+                        Beranda
+                      </a>
+                      <a 
+                        href="/merapiintro" 
+                        onClick={() => handleNavClick("/merapiintro")}
+                        className="block text-red-400 font-medium py-3 px-4 rounded-lg bg-red-400/10"
+                      >
+                        Tentang
+                      </a>
+                      <a 
+                        href="/mapsbarak" 
+                        onClick={() => handleNavClick("/mapsbarak")}
+                        className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+                      >
+                        Peta
+                      </a>
+                      <a 
+                        href="/information" 
+                        onClick={() => handleNavClick("/information")}
+                        className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+                      >
+                        Mitigasi
+                      </a>
+                      <a 
+                        href="/berita" 
+                        onClick={() => handleNavClick("/berita")}
+                        className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+                      >
+                        Berita
+                      </a>
+                    </nav>
+                  </div>
+                </div>
 
-          <div className="flex items-center gap-4">
-            <div className="text-white text-right text-sm hidden sm:block">
-              <div className="font-medium">{date}</div>
-              <div className="text-gray-300">{time}</div>
-            </div>
-            <a
-              href="/dashboard"
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-600 hover:to-red-700 transition-all shadow-lg"
-            >
-              Login
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Konten Utama */}
+      {/* Main Content */}
       <div className="pt-28">
         {/* Hero Section */}
         <div className="relative overflow-hidden">

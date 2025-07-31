@@ -3,6 +3,8 @@ import {
   MapPin,
   ShieldPlus,
   Newspaper,
+  Menu,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StatusIndicator from "./StatusIndicator";
@@ -10,6 +12,7 @@ import logo from "../assets/logo.png";
 
 const Home = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,10 +24,19 @@ const Home = () => {
       //setIsScrolled(window.scrollY > 50);
     };
 
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
     window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleResize);
+    
     return () => {
       clearInterval(timer);
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -45,10 +57,19 @@ const Home = () => {
 
   const { date, time } = formatTime(currentTime);
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleNavClick = (href) => {
+    setIsMobileMenuOpen(false);
+    
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       <StatusIndicator />
-      {/* Background with overlay */}
+      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-fixed"
         style={{
@@ -59,46 +80,116 @@ const Home = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60"></div>
       </div>
 
-      {/* Fixed Navigation */}
+      {/* Navigation */}
       <div className="fixed top-0 left-0 w-full z-20 bg-black/80 bg-opacity-50 backdrop-blur-md border-b border-red-500/20">
-        <div className="flex justify-between items-center px-6 py-4">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4">
+          {/* Logo Section */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-              <img src={logo} alt="Logo" className="w-6 h-9" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center">
+              <img src={logo} alt="Logo" className="w-5 h-7 sm:w-6 sm:h-9" />
             </div>
-            <span className="text-white font-bold text-xl">SiagaMerapi</span>
+            <span className="text-white font-bold text-lg sm:text-xl">SiagaMerapi</span>
           </div>
 
-          <nav className="hidden md:flex gap-8 text-white font-medium">
-            <a href="/" className="text-red-400 border-b-2 border-red-400">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex gap-6 xl:gap-8 text-white font-medium">
+            <a href="/" className="text-red-400 border-b-2 border-red-400 pb-1">
               Beranda
             </a>
-            <a href="/merapiintro" className="hover:text-red-400 transition-colors">
+            <a href="/merapiintro" className="hover:text-red-400 transition-colors pb-1">
               Tentang
             </a>
-            <a href="/mapsbarak" className="hover:text-red-400 transition-colors">
+            <a href="/mapsbarak" className="hover:text-red-400 transition-colors pb-1">
               Peta
             </a>
-            <a href="/information"  className="hover:text-red-400 transition-colors">
+            <a href="/information" className="hover:text-red-400 transition-colors pb-1">
               Mitigasi
             </a>
-            <a href="/berita" className="hover:text-red-400 transition-colors">
+            <a href="/berita" className="hover:text-red-400 transition-colors pb-1">
               Berita
             </a>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <div className="text-white text-right text-sm hidden sm:block">
+          {/* Right Section - Time & Login */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Time Display - Hidden on very small screens */}
+            <div className="text-white text-right text-xs sm:text-sm hidden md:block">
               <div className="font-medium">{date}</div>
               <div className="text-gray-300">{time}</div>
             </div>
+            
+            {/* Login Button */}
             <a
               href="/dashboard"
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-600 hover:to-red-700 transition-all shadow-lg"
+              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium text-sm sm:text-base hover:from-orange-600 hover:to-red-700 transition-all shadow-lg"
             >
               Login
             </a>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMobileMenu}
+              className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
           </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <div className={`lg:hidden transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen 
+            ? 'max-h-96 opacity-100' 
+            : 'max-h-0 opacity-0 overflow-hidden'
+        }`}>
+          <nav className="px-4 pb-4 space-y-2 bg-black/60 backdrop-blur-sm border-t border-white/10">
+            {/* Time Display for Mobile */}
+            <div className="md:hidden text-white text-center text-sm py-3 border-b border-white/10">
+              <div className="font-medium">{date}</div>
+              <div className="text-gray-300">{time}</div>
+            </div>
+            
+            <a 
+              href="/" 
+              onClick={() => handleNavClick("/")}
+              className="block text-red-400 font-medium py-3 px-4 rounded-lg bg-red-400/10"
+            >
+              Beranda
+            </a>
+            <a 
+              href="/merapiintro" 
+              onClick={() => handleNavClick("/merapiintro")}
+              className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Tentang
+            </a>
+            <a 
+              href="/mapsbarak" 
+              onClick={() => handleNavClick("/mapsbarak")}
+              className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Peta
+            </a>
+            <a 
+              href="/information" 
+              onClick={() => handleNavClick("/information")}
+              className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Mitigasi
+            </a>
+            <a 
+              href="/berita" 
+              onClick={() => handleNavClick("/berita")}
+              className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Berita
+            </a>
+          </nav>
         </div>
       </div>
 

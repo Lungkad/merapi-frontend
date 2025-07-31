@@ -465,6 +465,7 @@ const MapsBarak = () => {
   const [selectedDesa, setSelectedDesa] = useState("");
   const [maxDistance, setMaxDistance] = useState(10);
   const [userLocation, setUserLocation] = useState(null);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   // Navigation States
   const [isNavigating, setIsNavigating] = useState(false);
@@ -810,25 +811,25 @@ const MapsBarak = () => {
 
   // Custom icon for barak markers using Leaflet Awesome Markers
   const buildingIcons = {
-    'Barak Evakuasi': new L.AwesomeMarkers.icon({
+    "Barak Evakuasi": new L.AwesomeMarkers.icon({
       icon: "tent", // Font Awesome icon for Type1
       prefix: "fa",
       markerColor: "green",
       iconColor: "black",
     }),
-    'Fasilitas Pendidikan': new L.AwesomeMarkers.icon({
+    "Fasilitas Pendidikan": new L.AwesomeMarkers.icon({
       icon: "tent", // Font Awesome icon for Type2
       prefix: "fa",
       markerColor: "blue",
       iconColor: "black",
     }),
-    'Kantor Pemerintahan': new L.AwesomeMarkers.icon({
+    "Kantor Pemerintahan": new L.AwesomeMarkers.icon({
       icon: "tent", // Font Awesome icon for Type3
       prefix: "fa",
       markerColor: "red",
       iconColor: "black",
     }),
-    'Fasilitas Olahraga': new L.AwesomeMarkers.icon({
+    "Fasilitas Olahraga": new L.AwesomeMarkers.icon({
       icon: "tent", // Font Awesome icon for Type4
       prefix: "fa",
       markerColor: "purple",
@@ -837,7 +838,7 @@ const MapsBarak = () => {
   };
 
   const getIconByBuildingType = (tipe_Bangunan) => {
-    return buildingIcons[tipe_Bangunan] || buildingIcons['Barak Evakuasi']; // Fallback to Type1 icon if type is unknown
+    return buildingIcons[tipe_Bangunan] || buildingIcons["Barak Evakuasi"]; // Fallback to Type1 icon if type is unknown
   };
 
   const merapiIcon = new L.AwesomeMarkers.icon({
@@ -864,15 +865,18 @@ const MapsBarak = () => {
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
       {/* Header */}
-      <div className="fixed top-0 left-0 w-full z-20 bg-black/80 bg-opacity-50 backdrop-blur-md border-b border-red-500/20">
-        <div className="flex justify-between items-center px-6 py-4">
+      <div className="fixed top-0 left-0 w-full z-[100] bg-black/80 bg-opacity-50 backdrop-blur-md border-b border-red-500/20">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center">
               <img src={logo} alt="Logo" className="w-6 h-9" />
             </div>
-            <span className="text-white font-bold text-xl">SiagaMerapi</span>
+            <span className="text-white font-bold text-lg sm:text-xl">
+              SiagaMerapi
+            </span>
           </div>
 
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-8 text-white font-medium">
             <a href="/" className="hover:text-red-400 transition-colors">
               Beranda
@@ -883,7 +887,10 @@ const MapsBarak = () => {
             >
               Tentang
             </a>
-            <a href="/maps" className="text-red-400 border-b-2 border-red-400">
+            <a
+              href="/mapsbarak"
+              className="text-red-400 border-b-2 border-red-400"
+            >
               Peta
             </a>
             <a
@@ -897,27 +904,92 @@ const MapsBarak = () => {
             </a>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <a
               href="/mapsanalisis"
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm sm:text-base"
             >
               <Activity className="w-4 h-4" />
               <span className="hidden sm:inline">Analisis</span>
             </a>
+
+            {/* Sidebar toggle button - always visible */}
             <button
               onClick={() => setShowSidebar(!showSidebar)}
-              className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors md:hidden"
+              className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              title="Toggle Sidebar"
             >
-              <Menu className="w-5 h-5 text-white" />
+              {showSidebar ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <Search className="w-5 h-5 text-white" />
+              )}
+            </button>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors md:hidden"
+              title="Toggle Menu"
+            >
+              {showMobileMenu ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <Menu className="w-5 h-5 text-white" />
+              )}
             </button>
           </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <div
+          className={`md:hidden bg-black/90 backdrop-blur-md border-t border-red-500/20 transition-all duration-300 overflow-hidden z-[100] ${
+            showMobileMenu ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <nav className="flex flex-col px-4 py-4 space-y-3">
+            <a
+              href="/"
+              className="text-white hover:text-red-400 transition-colors py-2 border-b border-gray-700"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Beranda
+            </a>
+            <a
+              href="/merapiintro"
+              className="text-white hover:text-red-400 transition-colors py-2 border-b border-gray-700"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Tentang
+            </a>
+            <a
+              href="/mapsbarak"
+              className="text-red-400 py-2 border-b border-gray-700"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Peta  
+            </a>
+            <a
+              href="/information"
+              className="text-white hover:text-red-400 transition-colors py-2 border-b border-gray-700"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Mitigasi
+            </a>
+            <a
+              href="/berita"
+              className="text-white hover:text-red-400 transition-colors py-2"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Berita
+            </a>
+          </nav>
         </div>
       </div>
 
       {/* Sidebar */}
       <div
-        className={`fixed top-20 left-0 w-80 bg-white shadow-2xl z-20 transition-transform duration-300 ${
+        className={`fixed top-20 left-0 w-80 max-w-full bg-white shadow-2xl z-[100] transition-transform duration-300 ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
         } overflow-y-auto`}
         style={{ height: "calc(100vh - 5rem)" }}
@@ -927,7 +999,7 @@ const MapsBarak = () => {
             <h2 className="text-xl font-bold text-gray-800">Pencarian Barak</h2>
             <button
               onClick={() => setShowSidebar(false)}
-              className="p-1 hover:bg-gray-100 rounded-lg md:hidden"
+              className="p-1 hover:bg-gray-100 rounded-lg"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1197,9 +1269,13 @@ const MapsBarak = () => {
 
       {/* Map */}
       <div
-        className={`absolute top-20 bottom-0 right-0 transition-all duration-300 ${
+        className={`absolute top-20 bottom-0 right-0 transition-all duration-300 z-10 ${
           showSidebar ? "left-80" : "left-0"
         }`}
+        style={{
+          left: showSidebar ? "320px" : "0",
+          width: showSidebar ? "calc(100% - 320px)" : "100%",
+        }}
       >
         <MapContainer
           center={[-7.674246017544997, 110.39503800761653]}
@@ -1438,34 +1514,37 @@ const MapsBarak = () => {
       {/* Floating controls */}
       <div className="fixed bottom-6 right-6 z-20 space-y-2">
         {!showSidebar && (
-          <button
-            onClick={() => setShowSidebar(true)}
-            className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
-          >
-            <Search className="w-5 h-5 text-gray-700" />
-          </button>
-        )}
+          <div className="fixed bottom-6 right-6 z-20 space-y-2">
+            <button
+              onClick={() => setShowSidebar(true)}
+              className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+              title="Buka Pencarian"
+            >
+              <Search className="w-5 h-5 text-gray-700" />
+            </button>
 
-        {/* Quick Navigation Button */}
-        {userLocation && nearestBarak && !isNavigating && (
-          <button
-            onClick={navigateToNearestBarak}
-            className="w-12 h-12 bg-green-600 rounded-full shadow-lg flex items-center justify-center hover:bg-green-700 transition-colors"
-            title="Navigasi ke Barak Terdekat"
-          >
-            <Navigation2 className="w-5 h-5 text-white" />
-          </button>
-        )}
+            {/* Quick Navigation Button */}
+            {userLocation && nearestBarak && !isNavigating && (
+              <button
+                onClick={navigateToNearestBarak}
+                className="w-12 h-12 bg-green-600 rounded-full shadow-lg flex items-center justify-center hover:bg-green-700 transition-colors"
+                title="Navigasi ke Barak Terdekat"
+              >
+                <Navigation2 className="w-5 h-5 text-white" />
+              </button>
+            )}
 
-        {/* Stop Navigation Button */}
-        {isNavigating && (
-          <button
-            onClick={stopNavigation}
-            className="w-12 h-12 bg-red-600 rounded-full shadow-lg flex items-center justify-center hover:bg-red-700 transition-colors"
-            title="Hentikan Navigasi"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
+            {/* Stop Navigation Button */}
+            {isNavigating && (
+              <button
+                onClick={stopNavigation}
+                className="w-12 h-12 bg-red-600 rounded-full shadow-lg flex items-center justify-center hover:bg-red-700 transition-colors"
+                title="Hentikan Navigasi"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

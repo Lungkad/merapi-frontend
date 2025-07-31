@@ -5,11 +5,12 @@ import {
   ExternalLink,
   Calendar,
   Search,
-  Filter,
   Zap,
-  Mountain,
+  Menu,
+  X,
   AlertTriangle,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { beritaAPI } from "../services/api";
 import logo from "../assets/logo.png";
 import StatusIndicator from "./StatusIndicator";
@@ -21,24 +22,34 @@ const Beritas = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterActive, setFilterActive] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const beritasPerPage = 3;
 
   useEffect(() => {
-      const timer = setInterval(() => {
-        setCurrentTime(new Date());
-      }, 1000);
-  
-      const handleScroll = () => {
-        setIsScrolled(window.scrollY > 50);
-      };
-  
-      window.addEventListener('scroll', handleScroll);
-      return () => {
-        clearInterval(timer);
-        window.removeEventListener('scroll', handleScroll);
-      };
-    }, []);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     fetchBeritas();
@@ -85,19 +96,28 @@ const Beritas = () => {
 
   const formatTime = (date) => {
     return {
-      date: date.toLocaleDateString('id-ID', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      date: date.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
       }),
-      time: date.toLocaleTimeString('id-ID', { 
-        hour12: false,
-        timeZone: 'Asia/Jakarta'
-      }) + ' WIB'
+      time:
+        date.toLocaleTimeString("id-ID", {
+          hour12: false,
+          timeZone: "Asia/Jakarta",
+        }) + " WIB",
     };
   };
 
   const { date, time } = formatTime(currentTime);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleNavClick = (href) => {
+    setIsMobileMenuOpen(false);
+  };
 
   if (loading) {
     return (
@@ -113,7 +133,7 @@ const Beritas = () => {
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
       <StatusIndicator />
-      {/* Fixed Navbar */}
+      {/* Navigatiom */}
       <div className="fixed top-0 left-0 w-full z-20 bg-black/80 backdrop-blur-md border-b border-red-500/20">
         <div className="flex justify-between items-center px-6 py-4">
           <div className="flex items-center space-x-3">
@@ -123,36 +143,119 @@ const Beritas = () => {
             <span className="text-white font-bold text-xl">SiagaMerapi</span>
           </div>
 
-          <nav className="hidden md:flex gap-8 text-white font-medium">
-            <a href="/" className="hover:text-red-400 transition-colors">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex gap-6 xl:gap-8 text-white font-medium">
+            <a href="/" className="hover:text-red-400 transition-colors pb-1">
               Beranda
             </a>
-            <a href="/merapiintro" className="hover:text-red-400 transition-colors">
+            <a
+              href="/merapiintro"
+              className="hover:text-red-400 transition-colors pb-1"
+            >
               Tentang
             </a>
-            <a href="/mapsbarak" className="hover:text-red-400 transition-colors">
+            <a
+              href="/mapsbarak"
+              className="hover:text-red-400 transition-colors pb-1"
+            >
               Peta
             </a>
-            <a href="/information"  className="hover:text-red-400 transition-colors">
+            <a
+              href="/information"
+              className="hover:text-red-400 transition-colors pb-1"
+            >
               Mitigasi
             </a>
-            <a href="/berita" className="text-red-400 border-b-2 border-red-400 ">
+            <a
+              href="/berita"
+              className="text-red-400 border-b-2 border-red-400 pb-1"
+            >
               Berita
             </a>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <div className="text-white text-right text-sm hidden sm:block">
+          {/* Right Section - Time & Login */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Time Display - Hidden on very small screens */}
+            <div className="text-white text-right text-xs sm:text-sm hidden md:block">
               <div className="font-medium">{date}</div>
               <div className="text-gray-300">{time}</div>
             </div>
+
+            {/* Login Button */}
             <a
               href="/dashboard"
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-600 hover:to-red-700 transition-all shadow-lg"
+              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium text-sm sm:text-base hover:from-orange-600 hover:to-red-700 transition-all shadow-lg"
             >
               Login
             </a>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMobileMenu}
+              className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
           </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <div
+          className={`lg:hidden transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen
+              ? "max-h-96 opacity-100"
+              : "max-h-0 opacity-0 overflow-hidden"
+          }`}
+        >
+          <nav className="px-4 pb-4 space-y-2 bg-black/60 backdrop-blur-sm border-t border-white/10">
+            {/* Time Display for Mobile */}
+            <div className="md:hidden text-white text-center text-sm py-3 border-b border-white/10">
+              <div className="font-medium">{date}</div>
+              <div className="text-gray-300">{time}</div>
+            </div>
+
+            <a
+              href="/"
+              onClick={() => handleNavClick("/")}
+              className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Beranda
+            </a>
+            <a
+              href="/merapiintro"
+              onClick={() => handleNavClick("/merapiintro")}
+              className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Tentang
+            </a>
+            <a
+              href="/mapsbarak"
+              onClick={() => handleNavClick("/mapsbarak")}
+              className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Peta
+            </a>
+            <a
+              href="/information"
+              onClick={() => handleNavClick("/information")}
+              className="block text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Mitigasi
+            </a>
+            <a
+              href="/berita"
+              onClick={() => handleNavClick("/berita")}
+              className="block text-red-400 font-medium py-3 px-4 rounded-lg bg-red-400/10"
+            >
+              Berita
+            </a>
+          </nav>
         </div>
       </div>
 
