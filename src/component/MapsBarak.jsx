@@ -387,6 +387,53 @@ const Legend = () => {
   );
 };
 
+const useResponsiveSidebar = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // 768px adalah breakpoint md di Tailwind
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  return isMobile;
+};
+
+const useMapResize = (showSidebar) => {
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      const timer = setTimeout(() => {
+        mapRef.current.invalidateSize();
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [showSidebar]);
+
+  return mapRef;
+};
+
+const MapInvalidator = ({ showSidebar }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (map) {
+      const timer = setTimeout(() => {
+        map.invalidateSize();
+        console.log("Map resized after sidebar toggle");
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [map, showSidebar]);
+
+  return null;
+};
+
 const MapsBarak = () => {
   // State untuk data
   const [baraks, setBaraks] = useState([]);
@@ -409,12 +456,42 @@ const MapsBarak = () => {
   const [maxDistance, setMaxDistance] = useState(10);
   const [userLocation, setUserLocation] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const isMobile = useResponsiveSidebar();
 
   // Navigation States
   const [isNavigating, setIsNavigating] = useState(false);
   const [navigationTarget, setNavigationTarget] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
   const [nearestBarak, setNearestBarak] = useState(null);
+
+  useEffect(() => {
+    if (isMobile) {
+      setShowSidebar(false); // Selalu tutup di mobile
+    }
+  }, [isMobile]);
+
+  // Force map resize ketika sidebar toggle
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [showSidebar]);
+
+  const getMapContainerClasses = () => {
+    const baseClasses =
+      "absolute top-20 bottom-0 right-0 transition-all duration-300 z-10";
+
+    if (isMobile) {
+      // Di mobile: map tetap full width, sidebar overlay
+      return `${baseClasses} left-0 w-full`;
+    } else {
+      // Di desktop: sidebar push content
+      return showSidebar
+        ? `${baseClasses} left-80 w-[calc(100%-20rem)]`
+        : `${baseClasses} left-0 w-full`;
+    }
+  };
 
   // Fungsi untuk mengambil data barak dari database
   const fetchBaraks = async () => {
@@ -599,6 +676,10 @@ const MapsBarak = () => {
         barak: nearest,
       });
       setIsNavigating(true);
+
+      if (isMobile) {
+        setShowSidebar(false);
+      }
     } catch (err) {
       console.error("Error in navigateToNearestBarak:", err);
       setError("Terjadi kesalahan saat memulai navigasi.");
@@ -632,6 +713,9 @@ const MapsBarak = () => {
         barak,
       });
       setIsNavigating(true);
+      if (isMobile) {
+        setShowSidebar(false);
+      }
     } catch (err) {
       console.error("Error in navigateToBarak:", err);
       setError("Terjadi kesalahan saat memulai navigasi.");
@@ -1009,10 +1093,13 @@ const MapsBarak = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-20 left-0 w-80 max-w-full bg-white shadow-2xl z-[100] transition-transform duration-300 ${
+        className={`fixed top-20 left-0 bg-white shadow-2xl transition-transform duration-300 overflow-y-auto ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
-        } overflow-y-auto`}
-        style={{ height: "calc(100vh - 5rem)" }}
+        } ${
+          isMobile
+            ? "w-full h-[calc(100vh-5rem)] z-[150]"
+            : "w-80 h-[calc(100vh-5rem)] z-[100]"
+        }`}
       >
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -1288,15 +1375,7 @@ const MapsBarak = () => {
       </div>
 
       {/* Map */}
-      <div
-        className={`absolute top-20 bottom-0 right-0 transition-all duration-300 z-10 ${
-          showSidebar ? "left-80" : "left-0"
-        }`}
-        style={{
-          left: showSidebar ? "320px" : "0",
-          width: showSidebar ? "calc(100% - 320px)" : "100%",
-        }}
-      >
+      <div className={getMapContainerClasses()}>
         {(geoJsonLoading.jalurevakuasi || geoJsonLoading.jarakmerapi) && (
           <div className="fixed top-24 left-4 z-[90] bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm">
             <div className="flex items-center gap-2">
@@ -1305,12 +1384,14 @@ const MapsBarak = () => {
             </div>
           </div>
         )}
+
         <MapContainer
           center={[-7.674246017544997, 110.39503800761653]}
           zoom={12}
           zoomControl={false}
           style={{ height: "100%", width: "100%" }}
         >
+          <MapInvalidator showSidebar={showSidebar} />
           <ZoomControl position="topleft" />
 
           {/* Base Layer */}

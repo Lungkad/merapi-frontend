@@ -7,6 +7,7 @@ import {
   ZoomControl,
   GeoJSON,
   LayersControl,
+  useMap
 } from "react-leaflet";
 import {
   Activity,
@@ -288,6 +289,53 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+const useResponsiveSidebar = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // 768px adalah breakpoint md di Tailwind
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  return isMobile;
+};
+
+const useMapResize = (showSidebar) => {
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      const timer = setTimeout(() => {
+        mapRef.current.invalidateSize();
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [showSidebar]);
+
+  return mapRef;
+};
+
+const MapInvalidator = ({ showSidebar }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (map) {
+      const timer = setTimeout(() => {
+        map.invalidateSize();
+        console.log("Map resized after sidebar toggle");
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [map, showSidebar]);
+
+  return null;
+};
+
 const CoverageGapAnalysisMain = () => {
   const [baraks, setBaraks] = useState([]);
   const [slemankecData, setSlemankecData] = useState(null);
@@ -302,6 +350,7 @@ const CoverageGapAnalysisMain = () => {
   const [showLayersControl, setShowLayersControl] = useState(true);
   const [showClustering, setShowClustering] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const isMobile = useResponsiveSidebar();
 
   const [serviceRadius, setServiceRadius] = useState(2000);
   const [showCoverageZones, setShowCoverageZones] = useState(true);
@@ -354,6 +403,26 @@ const CoverageGapAnalysisMain = () => {
       setBaraks([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [showSidebar]);
+
+  const getMapContainerClasses = () => {
+    const baseClasses =
+      "absolute top-20 bottom-0 right-0 transition-all duration-300 z-10";
+
+    if (isMobile) {
+      return `${baseClasses} left-0 w-full`;
+    } else {
+      return showSidebar
+        ? `${baseClasses} left-80 w-[calc(100%-20rem)]`
+        : `${baseClasses} left-0 w-full`;
     }
   };
 
@@ -592,10 +661,13 @@ const CoverageGapAnalysisMain = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-20 left-0 w-80 max-w-full bg-white shadow-2xl z-50 transition-transform duration-300 ${
+        className={`fixed top-20 left-0 bg-white shadow-2xl transition-transform duration-300 overflow-y-auto ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
-        } overflow-y-auto`}
-        style={{ height: "calc(100vh - 5rem)" }}
+        } ${
+          isMobile
+            ? "w-full h-[calc(100vh-5rem)] z-[150]"
+            : "w-80 h-[calc(100vh-5rem)] z-[100]"
+        }`}
       >
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -848,15 +920,7 @@ const CoverageGapAnalysisMain = () => {
       </div>
 
       {/* Map */}
-      <div
-        className={`absolute top-20 bottom-0 right-0 transition-all duration-300 z-10 ${
-          showSidebar ? "left-80" : "left-0"
-        }`}
-        style={{
-          left: showSidebar ? "320px" : "0",
-          width: showSidebar ? "calc(100% - 320px)" : "100%",
-        }}
-      >
+      <div className={getMapContainerClasses()}>
         <MapContainer
           center={[-7.797068, 110.370529]}
           zoom={12}
@@ -864,6 +928,7 @@ const CoverageGapAnalysisMain = () => {
           style={{ height: "100%", width: "100%" }}
           whenReady={(map) => setMapInstance(map.target)}
         >
+          <MapInvalidator showSidebar={showSidebar} />
           <ZoomControl position="topleft" />
 
           {showLayersControl && (
