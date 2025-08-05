@@ -359,7 +359,6 @@ const Legend = () => {
     { icon: "fa-tent", color: "green", label: "Barak - Barak Evakuasi" },
     { icon: "fa-tent", color: "red", label: "Barak - Kantor Pemerintahan" },
     { icon: "fa-tent", color: "blue", label: "Barak - Fasilitas Pendidikan" },
-    { icon: "fa-tent", color: "purple", label: "Barak - Fasilitas Olahraga" },
     { icon: "fa-mountain", color: "red", label: "Gunung Merapi" },
     { icon: "fa-user", color: "blue", label: "Lokasi Anda" },
     { icon: "fa-minus", color: "gray", label: "Jalur Evakuasi" },
@@ -936,7 +935,7 @@ const MapsBarak = () => {
     "Fasilitas Olahraga": new L.AwesomeMarkers.icon({
       icon: "tent", // Font Awesome icon for Type4
       prefix: "fa",
-      markerColor: "purple",
+      markerColor: "yellow",
       iconColor: "black",
     }),
   };
