@@ -64,33 +64,6 @@ const mitigationDocs = [
     category: "Pengenalan",
     redirectURL: "https://drive.google.com/file/d/17UTMPfWFIs6-vE3ZTAQLPLARYTcqoRaR/view?usp=drive_link"
   },
-  // {
-  //   id: 2,
-  //   title: "Checklist Tas Darurat",
-  //   description: "Daftar lengkap barang yang harus disiapkan",
-  //   filename: "checklist-tas-darurat.pdf",
-  //   size: "1.1 MB",
-  //   pages: 8,
-  //   category: "Checklist"
-  // },
-  // {
-  //   id: 3,
-  //   title: "Prosedur Darurat Keluarga",
-  //   description: "Langkah-langkah koordinasi keluarga saat darurat",
-  //   filename: "prosedur-darurat-keluarga.pdf",
-  //   size: "1.8 MB",
-  //   pages: 12,
-  //   category: "Keluarga"
-  // },
-  // {
-  //   id: 4,
-  //   title: "Kesiapsiagaan Masyarakat",
-  //   description: "Panduan kesiapsiagaan untuk masyarakat sekitar Merapi",
-  //   filename: "kesiapsiagaan-masyarakat.pdf",
-  //   size: "2.9 MB",
-  //   pages: 20,
-  //   category: "Masyarakat"
-  // }
 ];
 
 // Data untuk kategori Peta Merapi
@@ -117,36 +90,6 @@ const mapDocs = [
     mapType: "Jalur",
     redirectURL: "https://drive.google.com/file/d/1rSHhuFJXKNtop6YmVacGTSmW9cVpghUI/view?usp=drive_link"
   },
-  // {
-  //   id: 3,
-  //   title: "Peta Jalur Evakuasi Klaten",
-  //   description: "Jalur evakuasi resmi untuk wilayah Kabupaten Klaten",
-  //   filename: "jalur-evakuasi-klaten.pdf",
-  //   size: "2.8 MB",
-  //   pages: 4,
-  //   category: "Evakuasi",
-  //   mapType: "Jalur"
-  // },
-  // {
-  //   id: 4,
-  //   title: "Lokasi Shelter Darurat",
-  //   description: "Peta lokasi tempat pengungsian dan shelter darurat",
-  //   filename: "lokasi-shelter-merapi.pdf",
-  //   size: "2.5 MB",
-  //   pages: 8,
-  //   category: "Shelter",
-  //   mapType: "Lokasi"
-  // },
-  // {
-  //   id: 5,
-  //   title: "Peta Topografi Detail Merapi",
-  //   description: "Peta topografi lengkap kawasan Gunung Merapi",
-  //   filename: "topografi-merapi.pdf",
-  //   size: "5.1 MB",
-  //   pages: 12,
-  //   category: "Topografi",
-  //   mapType: "Geografis"
-  // }
 ];
 
 // Data untuk kategori Infografis
@@ -261,7 +204,6 @@ const Information = () => {
       //setIsScrolled(window.scrollY > 50);
     };
 
-
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -284,6 +226,19 @@ const Information = () => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showPdfModal || showMapModal || showInfographicModal || isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showPdfModal, showMapModal, showInfographicModal, isMobileMenuOpen]);
 
   const formatTime = (date) => {
     return {
@@ -308,7 +263,6 @@ const Information = () => {
 
   const handleNavClick = (href) => {
     setIsMobileMenuOpen(false);
-    
   };
   
   const categories = ["Semua", ...new Set(faqs.map(faq => faq.category))];
@@ -360,12 +314,12 @@ const Information = () => {
       <StatusIndicator />
       {/* Navigation */}
       <div className="fixed top-0 left-0 w-full z-20 bg-black/80 bg-opacity-50 backdrop-blur-md border-b border-red-500/20">
-        <div className="flex justify-between items-center px-6 py-4">
+        <div className="flex justify-between items-center px-4 sm:px-6 py-4">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-              <img src={logo} alt="Logo" className="w-6 h-9" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center">
+              <img src={logo} alt="Logo" className="w-5 h-7 sm:w-6 sm:h-9" />
             </div>
-            <span className="text-white font-bold text-xl">SiagaMerapi</span>
+            <span className="text-white font-bold text-lg sm:text-xl">SiagaMerapi</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -389,7 +343,7 @@ const Information = () => {
 
           {/* Right Section - Time & Login */}
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Time Display - Hidden on very small screens */}
+            {/* Time Display - Hidden on mobile */}
             <div className="text-white text-right text-xs sm:text-sm hidden md:block">
               <div className="font-medium">{date}</div>
               <div className="text-gray-300">{time}</div>
@@ -470,44 +424,44 @@ const Information = () => {
         </div>
       </div>
 
-      {/* Hero Section */}
-      <div className="pt-32 pb-16 px-6">
+      {/* Hero Section - Mobile optimized */}
+      <div className="pt-24 sm:pt-32 pb-8 sm:pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-3 bg-red-500/20 text-red-300 px-6 py-3 rounded-full mb-6 border border-red-500/30">
-            <AlertTriangle className="w-5 h-5" />
+          <div className="inline-flex items-center gap-2 sm:gap-3 bg-red-500/20 text-red-300 px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-4 sm:mb-6 border border-red-500/30 text-sm sm:text-base">
+            <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="font-semibold">Informasi Penting Gunung Merapi</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
             Pusat <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-500">Informasi</span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+          <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed">
             Temukan panduan lengkap, peta evakuasi, dan jawaban atas pertanyaan umum tentang mitigasi bencana Gunung Merapi
           </p>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 pb-16">
-        <div className="grid lg:grid-cols-2 gap-12">
+      {/* Main Content - Mobile optimized layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12">
           {/* FAQ Section */}
-          <div className="bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl p-8 border border-white/20">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Book className="w-6 h-6 text-white" />
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 border border-white/20">
+            <div className="flex items-center gap-3 mb-6 sm:mb-8">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Book className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-white">FAQ</h2>
-                <p className="text-gray-300">Pertanyaan yang sering diajukan</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white">FAQ</h2>
+                <p className="text-gray-300 text-sm sm:text-base">Pertanyaan yang sering diajukan</p>
               </div>
             </div>
 
-            {/* Category Filter */}
+            {/* Category Filter - Mobile optimized */}
             <div className="flex flex-wrap gap-2 mb-6">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
                     selectedCategory === category
                       ? 'bg-red-500 text-white shadow-lg'
                       : 'bg-white/10 text-gray-300 hover:bg-white/20'
@@ -526,12 +480,14 @@ const Information = () => {
                 >
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full p-6 text-left flex items-center justify-between"
+                    className="w-full p-4 sm:p-6 text-left flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-3">
-                      {faq.icon}
-                      <div>
-                        <h3 className="text-lg font-semibold text-white mb-1">
+                    <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                      <div className="flex-shrink-0 mt-1 sm:mt-0">
+                        {faq.icon}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base sm:text-lg font-semibold text-white mb-1 leading-tight">
                           {faq.question}
                         </h3>
                         <span className="text-xs text-gray-400 bg-white/10 px-2 py-1 rounded">
@@ -539,16 +495,18 @@ const Information = () => {
                         </span>
                       </div>
                     </div>
-                    {expandedFaq === index ? 
-                      <ChevronUp className="w-5 h-5 text-gray-400" /> : 
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    }
+                    <div className="flex-shrink-0 ml-2">
+                      {expandedFaq === index ? 
+                        <ChevronUp className="w-5 h-5 text-gray-400" /> : 
+                        <ChevronDown className="w-5 h-5 text-gray-400" />
+                      }
+                    </div>
                   </button>
                   
                   {expandedFaq === index && (
-                    <div className="px-6 pb-6">
-                      <div className="bg-white/5 rounded-lg p-4 border-l-4 border-red-500">
-                        <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+                    <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                      <div className="bg-white/5 rounded-lg p-3 sm:p-4 border-l-4 border-red-500">
+                        <p className="text-gray-300 leading-relaxed text-sm sm:text-base">{faq.answer}</p>
                       </div>
                     </div>
                   )}
@@ -557,11 +515,11 @@ const Information = () => {
             </div>
           </div>
 
-          {/* Info Items Section */}
+          {/* Info Items Section - Mobile optimized */}
           <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4">Layanan Informasi</h2>
-              <p className="text-gray-300">Akses berbagai sumber informasi penting</p>
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Layanan Informasi</h2>
+              <p className="text-gray-300 text-sm sm:text-base">Akses berbagai sumber informasi penting</p>
             </div>
             
             {infoItems.map((item, index) => (
@@ -572,26 +530,28 @@ const Information = () => {
               >
                 <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
                 
-                <div className="p-8">
-                  <div className="flex items-center gap-6">
-                    <div className={`w-16 h-16 ${item.bgColor} rounded-2xl flex items-center justify-center relative`}>
-                      {item.icon}
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <div className="p-6 sm:p-8">
+                  <div className="flex items-center gap-4 sm:gap-6">
+                    <div className={`w-12 h-12 sm:w-16 sm:h-16 ${item.bgColor} rounded-2xl flex items-center justify-center relative flex-shrink-0`}>
+                      <div className="scale-75 sm:scale-100">
+                        {item.icon}
+                      </div>
+                      <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-gray-800 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold">
                         {item.number}
                       </div>
                     </div>
                     
-                    <div className="flex-1">
-                      <h4 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-gray-900">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-lg sm:text-2xl font-bold text-gray-800 mb-2 group-hover:text-gray-900">
                         {item.title}
                       </h4>
-                      <p className="text-gray-600 mb-4 leading-relaxed">{item.desc}</p>
+                      <p className="text-gray-600 mb-3 sm:mb-4 leading-relaxed text-sm sm:text-base">{item.desc}</p>
                       
-                      <div className="flex gap-2 mb-4">
+                      <div className="flex flex-wrap gap-2 mb-3 sm:mb-4">
                         {item.features.map((feature, idx) => (
                           <span
                             key={idx}
-                            className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium"
+                            className="bg-gray-100 text-gray-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
                           >
                             {feature}
                           </span>
@@ -600,7 +560,7 @@ const Information = () => {
                       
                       <div className="flex items-center gap-2 text-blue-600 font-medium group-hover:text-blue-700">
                         <Eye className="w-4 h-4" />
-                        <span>Lihat Detail</span>
+                        <span className="text-sm sm:text-base">Lihat Detail</span>
                       </div>
                     </div>
                   </div>
@@ -611,50 +571,50 @@ const Information = () => {
         </div>
       </div>
 
-      {/* Modal untuk Panduan Mitigasi (PDF) */}
+      {/* Modal untuk Panduan Mitigasi (PDF) - Mobile optimized */}
       {showPdfModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800">Dokumen Panduan Mitigasi</h3>
-                <p className="text-gray-600">Pilih dokumen yang ingin Anda lihat</p>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-4xl h-[95vh] sm:max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg sm:text-2xl font-bold text-gray-800">Dokumen Panduan Mitigasi</h3>
+                <p className="text-gray-600 text-sm sm:text-base">Pilih dokumen yang ingin Anda lihat</p>
               </div>
               <button
                 onClick={() => setShowPdfModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="flex-shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors ml-2"
               >
                 <X className="w-6 h-6 text-gray-500" />
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto max-h-[70vh]">
-              <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 sm:p-6 overflow-y-auto" style={{height: 'calc(100% - 100px)'}}>
+              <div className="grid gap-4 sm:grid-cols-2">
                 {mitigationDocs.map((doc) => (
-                  <div key={doc.id} className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-blue-300 transition-colors">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-blue-600" />
+                  <div key={doc.id} className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-200 hover:border-blue-300 transition-colors">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-800 mb-2">{doc.title}</h4>
-                        <p className="text-sm text-gray-600 mb-3">{doc.description}</p>
-                        <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">{doc.title}</h4>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-3">{doc.description}</p>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500 mb-4">
                           <span>{doc.pages} halaman</span>
                           <span>{doc.size}</span>
-                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">{doc.category}</span>
+                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">{doc.category}</span>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <button
                             onClick={() => handleRedirect(doc.redirectURL)}
-                            className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                            className="flex items-center gap-2 bg-blue-500 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-600 transition-colors"
                           >
                             <Eye className="w-4 h-4" />
                             {isMobile ? 'Buka' : 'Lihat'}
                           </button>
                           <button
                             onClick={() => handlePdfDownload(doc.filename)}
-                            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+                            className="flex items-center gap-2 bg-green-500 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-600 transition-colors"
                           >
                             <Download className="w-4 h-4" />
                             Download
@@ -670,51 +630,51 @@ const Information = () => {
         </div>
       )}
 
-      {/* Modal untuk Peta Merapi */}
+      {/* Modal untuk Peta Merapi - Mobile optimized */}
       {showMapModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800">Peta Gunung Merapi</h3>
-                <p className="text-gray-600">Koleksi peta dan jalur evakuasi Gunung Merapi</p>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-5xl h-[95vh] sm:max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg sm:text-2xl font-bold text-gray-800">Peta Gunung Merapi</h3>
+                <p className="text-gray-600 text-sm sm:text-base">Koleksi peta dan jalur evakuasi Gunung Merapi</p>
               </div>
               <button
                 onClick={() => setShowMapModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="flex-shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors ml-2"
               >
                 <X className="w-6 h-6 text-gray-500" />
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto max-h-[70vh]">
-              <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 sm:p-6 overflow-y-auto" style={{height: 'calc(100% - 100px)'}}>
+              <div className="grid gap-4 sm:grid-cols-2">
                 {mapDocs.map((map) => (
-                  <div key={map.id} className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border border-red-200 hover:border-red-300 transition-colors">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                        <MapPin className="w-6 h-6 text-red-600" />
+                  <div key={map.id} className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-4 sm:p-6 border border-red-200 hover:border-red-300 transition-colors">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-800 mb-2">{map.title}</h4>
-                        <p className="text-sm text-gray-600 mb-3">{map.description}</p>
-                        <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">{map.title}</h4>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-3">{map.description}</p>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 mb-4">
                           <span>{map.pages} halaman</span>
                           <span>{map.size}</span>
-                          <span className="bg-red-100 text-red-700 px-2 py-1 rounded">{map.category}</span>
-                          <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded">{map.mapType}</span>
+                          <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">{map.category}</span>
+                          <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs">{map.mapType}</span>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <button
                             onClick={() => handleRedirect(map.redirectURL)}
-                            className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
+                            className="flex items-center gap-2 bg-red-500 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-red-600 transition-colors"
                           >
                             <Eye className="w-4 h-4" />
                             {isMobile ? 'Buka' : 'Lihat'}
                           </button>
                           <button
                             onClick={() => handleMapDownload(map.filename)}
-                            className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
+                            className="flex items-center gap-2 bg-orange-500 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-orange-600 transition-colors"
                           >
                             <Download className="w-4 h-4" />
                             Download
@@ -730,37 +690,37 @@ const Information = () => {
         </div>
       )}
 
-      {/* Modal untuk Infografis */}
+      {/* Modal untuk Infografis - Mobile optimized */}
       {showInfographicModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800">Infografis Edukasi Merapi</h3>
-                <p className="text-gray-600">Visual edukatif untuk memahami risiko dan tindakan darurat</p>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-5xl h-[95vh] sm:max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg sm:text-2xl font-bold text-gray-800">Infografis Edukasi Merapi</h3>
+                <p className="text-gray-600 text-sm sm:text-base">Visual edukatif untuk memahami risiko dan tindakan darurat</p>
               </div>
               <button
                 onClick={() => setShowInfographicModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="flex-shrink-0 p-2 hover:bg-gray-100 rounded-full transition-colors ml-2"
               >
                 <X className="w-6 h-6 text-gray-500" />
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto max-h-[70vh]">
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-4 sm:p-6 overflow-y-auto" style={{height: 'calc(100% - 100px)'}}>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {infographicDocs.map((item) => (
-                  <div key={item.id} className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-6 border border-green-200 hover:border-green-300 transition-colors">
+                  <div key={item.id} className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-4 sm:p-6 border border-green-200 hover:border-green-300 transition-colors">
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                           {item.type === 'Video' ? (
-                            <Play className="w-5 h-5 text-green-600" />
+                            <Play className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                           ) : (
-                            <Eye className="w-5 h-5 text-green-600" />
+                            <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                           )}
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded font-medium">
                             {item.type}
                           </span>
@@ -768,20 +728,20 @@ const Information = () => {
                       </div>
                       
                       <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">{item.title}</h4>
-                        <p className="text-sm text-gray-600 mb-3">{item.description}</p>
+                        <h4 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">{item.title}</h4>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-3">{item.description}</p>
                         
-                        <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-4">
-                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">{item.category}</span>
-                          <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded">{item.format}</span>
-                          <span>{item.size}</span>
-                          {item.duration && <span>⏱️ {item.duration}</span>}
+                        <div className="flex flex-wrap gap-1 sm:gap-2 text-xs text-gray-500 mb-4">
+                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">{item.category}</span>
+                          <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">{item.format}</span>
+                          <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">{item.size}</span>
+                          {item.duration && <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">⏱️ {item.duration}</span>}
                         </div>
                         
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleRedirect(item.redirectURL)}
-                            className="flex items-center gap-2 bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex-1"
+                            className="flex items-center gap-2 bg-green-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-600 transition-colors flex-1 justify-center"
                           >
                             {item.type === 'Video' ? (
                               <Play className="w-4 h-4" />
@@ -792,7 +752,7 @@ const Information = () => {
                           </button>
                           <button
                             onClick={() => handleInfographicDownload(item.filename)}
-                            className="flex items-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                            className="flex items-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-600 transition-colors"
                           >
                             <Download className="w-4 h-4" />
                           </button>
