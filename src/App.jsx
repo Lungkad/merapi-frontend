@@ -10,6 +10,7 @@ import BarakEdit from "./component/BarakEdit";
 import BeritaList from "./component/BeritaList";
 import Beritas from "./component/Beritas";
 import BeritaForm from "./component/BeritaForm";
+import BeritaEdit from "./component/BeritaEdit";
 
 import Home from "./component/Home";
 import Maps from "./component/Maps";
@@ -111,6 +112,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BeritaForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/beritas/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <BeritaEdit />
                 </ProtectedRoute>
               }
             />

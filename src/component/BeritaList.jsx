@@ -8,6 +8,8 @@ import {
   PanelBottom,
   User,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { beritaAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
@@ -21,7 +23,9 @@ const BeritaList = () => {
   const { logout } = useAuth();
 
   const navigate = useNavigate();
-  const activeTab = "beritalist"; // Hardcoded for this component
+  const activeTab = "beritalist";
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchBeritas(currentPage);
@@ -61,17 +65,62 @@ const BeritaList = () => {
     }
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading...</div>;
   }
 
   return (
-    <div className="flex h-screen font-sans">
+    <div className="flex h-screen bg-gray-50 relative">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={closeSidebar}
+        />
+      )}
       {/* Sidebar */}
-      <div className="w-64 bg-black text-white flex flex-col">
-        <div className="p-6 border-b border-gray-800">
-          <h1 className="text-xl font-bold">Siaga Merapi</h1>
-          <p className="text-gray-400 text-sm mt-1">Dashboard Admin</p>
+      <div
+        className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        w-64 bg-black text-white flex flex-col h-screen
+        transform transition-transform duration-300 ease-in-out
+        ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }
+      `}
+      >
+        {/* Sidebar Header */}
+        <div className="p-6 border-b border-gray-800 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold">Siaga Merapi</h1>
+            <p className="text-gray-400 text-sm mt-1">Dashboard Admin</p>
+          </div>
+          {/* Close button for mobile */}
+          <button
+            onClick={closeSidebar}
+            className="lg:hidden text-gray-400 hover:text-white p-1"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         <nav className="flex-1 p-4">
@@ -152,7 +201,7 @@ const BeritaList = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-6 overflow-auto lg:ml-0">
         {alert && (
           <div
             className={`alert mt-4 mb-4 p-4 rounded ${
@@ -172,6 +221,13 @@ const BeritaList = () => {
         )}
 
         <div className="flex justify-between items-center mb-6 mt-6">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleSidebar}
+            className="lg:hidden mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
           <h1 className="text-2xl font-bold">Daftar Berita</h1>
           <Link
             to="/beritaform"
@@ -181,81 +237,89 @@ const BeritaList = () => {
           </Link>
         </div>
 
-        <div className="bg-white rounded shadow overflow-hidden">
+        {/* Container untuk table dengan horizontal scroll */}
+        <div className="bg-white rounded shadow">
           {beritas.length > 0 ? (
             <>
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      No
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Judul
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Gambar
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Summary
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Link Berita
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {beritas.map((berita, index) => (
-                    <tr key={berita.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {(currentPage - 1) * 10 + index + 1}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {berita.judul_berita}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <img
-                          src={berita.gambar_berita}
-                          alt={berita.judul_berita}
-                          className="w-20 h-20 object-cover"
-                        />
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {berita.ringkasan_berita}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <a
-                          href={berita.url_berita}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          Lihat Berita
-                        </a>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <Link
-                            to={`/beritas/${berita.id}/edit`}
-                            className="text-yellow-600 hover:text-yellow-900"
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(berita.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Hapus
-                          </button>
-                        </div>
-                      </td>
+              {/* Wrapper dengan horizontal scroll */}
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px]">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        No
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[200px]">
+                        Judul
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        Gambar
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[250px]">
+                        Summary
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        Link Berita
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        Aksi
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {beritas.map((berita, index) => (
+                      <tr key={berita.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {(currentPage - 1) * 10 + index + 1}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900 max-w-[200px]">
+                          <div className="truncate" title={berita.judul_berita}>
+                            {berita.judul_berita}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <img
+                            src={berita.gambar_berita}
+                            alt={berita.judul_berita}
+                            className="w-20 h-20 object-cover rounded"
+                          />
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900 max-w-[250px]">
+                          <div className="truncate" title={berita.ringkasan_berita}>
+                            {berita.ringkasan_berita}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <a
+                            href={berita.url_berita}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-900 underline"
+                          >
+                            Lihat Berita
+                          </a>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <Link
+                              to={`/beritas/${berita.id}/edit`}
+                              className="text-yellow-600 hover:text-yellow-900"
+                            >
+                              Edit
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(berita.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
               {/* Pagination */}
               {pagination && pagination.last_page > 1 && (
@@ -298,7 +362,7 @@ const BeritaList = () => {
                           results
                         </p>
                       </div>
-                      <div>
+                      <div className="overflow-x-auto">
                         <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                           {Array.from(
                             { length: pagination.last_page },
@@ -307,7 +371,7 @@ const BeritaList = () => {
                             <button
                               key={page}
                               onClick={() => setCurrentPage(page)}
-                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium whitespace-nowrap ${
                                 page === currentPage
                                   ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
                                   : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"

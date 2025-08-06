@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { TrendingUp, Tent, Newspaper, PanelBottom, User, LogOut } from "lucide-react";
+import {
+  TrendingUp,
+  Tent,
+  Newspaper,
+  PanelBottom,
+  User,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { barakAPI } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
@@ -16,6 +25,8 @@ const BarakList = () => {
 
   const [activeTab, setActiveTab] = useState("baraks");
   const navigate = useNavigate();
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchBaraks(currentPage);
@@ -55,17 +66,62 @@ const BarakList = () => {
     }
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading...</div>;
   }
 
   return (
-    <div className="flex h-screen font-sans">
+    <div className="flex h-screen bg-gray-50 relative">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={closeSidebar}
+        />
+      )}
       {/* Sidebar */}
-      <div className="w-64 bg-black text-white flex flex-col">
-        <div className="p-6 border-b border-gray-800">
-          <h1 className="text-xl font-bold">Siaga Merapi</h1>
-          <p className="text-gray-400 text-sm mt-1">Dashboard Admin</p>
+      <div
+        className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        w-64 bg-black text-white flex flex-col h-screen
+        transform transition-transform duration-300 ease-in-out
+        ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }
+      `}
+      >
+        {/* Sidebar Header */}
+        <div className="p-6 border-b border-gray-800 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold">Siaga Merapi</h1>
+            <p className="text-gray-400 text-sm mt-1">Dashboard Admin</p>
+          </div>
+          {/* Close button for mobile */}
+          <button
+            onClick={closeSidebar}
+            className="lg:hidden text-gray-400 hover:text-white p-1"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         <nav className="flex-1 p-4">
@@ -146,7 +202,7 @@ const BarakList = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-6 overflow-auto lg:ml-0">
         {alert && (
           <div
             className={`alert mt-4 mb-4 p-4 rounded ${
@@ -166,6 +222,13 @@ const BarakList = () => {
         )}
 
         <div className="flex justify-between items-center mb-6 mt-6">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleSidebar}
+            className="lg:hidden mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
           <h1 className="text-2xl font-bold">Daftar Barak</h1>
           <Link
             to="/baraksform"
@@ -190,10 +253,11 @@ const BarakList = () => {
             <option value="asc">Terlama</option>
           </select>
         </div>
-        <div className="bg-white rounded shadow overflow-hidden">
+        <div className="bg-white rounded shadow">
           {baraks.length > 0 ? (
             <>
-              <table className="w-full">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px]">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -262,6 +326,7 @@ const BarakList = () => {
                   ))}
                 </tbody>
               </table>
+              </div>
 
               {/* Pagination */}
               {pagination && pagination.last_page > 1 && (
