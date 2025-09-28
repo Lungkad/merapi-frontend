@@ -94,86 +94,6 @@ const CoverageGapAnalysis = ({
   return null;
 };
 
-// Distance-based Risk Analysis (without capacity dependency)
-const DistanceRiskAnalysis = ({ data, map }) => {
-  useEffect(() => {
-    if (!map || !data?.length) return;
-
-    const riskCircles = [];
-    const merapiLat = -7.540585;
-    const merapiLng = 110.44638;
-
-    data.forEach((barak) => {
-      const lat = parseFloat(barak.latitude);
-      const lng = parseFloat(barak.longitude);
-
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const distanceFromMerapi = calculateDistance(
-          lat,
-          lng,
-          merapiLat,
-          merapiLng
-        );
-
-        let riskLevel = "low";
-        let riskScore = 0;
-        let riskColor = "#00aa00";
-
-        riskScore = Math.max(0, 100 - distanceFromMerapi * 4);
-
-        if (riskScore >= 75) {
-          riskLevel = "very_high";
-          riskColor = "#cc0000";
-        } else if (riskScore >= 50) {
-          riskLevel = "high";
-          riskColor = "#ff4400";
-        } else if (riskScore >= 25) {
-          riskLevel = "medium";
-          riskColor = "#ffaa00";
-        } else {
-          riskLevel = "low";
-          riskColor = "#00aa00";
-        }
-
-        const radius = 500;
-        const circle = L.circle([lat, lng], {
-          radius: radius,
-          fillColor: riskColor,
-          fillOpacity: 0.3,
-          stroke: true,
-          color: riskColor,
-          weight: 3,
-          opacity: 0.8,
-        });
-
-        circle.bindPopup(`
-          <div class="text-sm">
-            <strong>${barak.nama_barak}</strong><br/>
-            <strong>Risk Level:</strong> <span style="color: ${riskColor}; font-weight: bold;">${riskLevel
-          .replace("_", " ")
-          .toUpperCase()}</span><br/>
-            <strong>Risk Score:</strong> ${riskScore.toFixed(1)}/100<br/>
-            <strong>Distance from Merapi:</strong> ${distanceFromMerapi.toFixed(
-              1
-            )} km<br/>
-            <strong>Kecamatan:</strong> ${barak.kecamatan}<br/>
-            <strong>Desa:</strong> ${barak.desa}
-          </div>
-        `);
-
-        circle.addTo(map);
-        riskCircles.push(circle);
-      }
-    });
-
-    return () => {
-      riskCircles.forEach((circle) => map.removeLayer(circle));
-    };
-  }, [map, data]);
-
-  return null;
-};
-
 // Marker Clustering component
 const MarkerClustering = ({ data, map, showClustering, icon }) => {
   useEffect(() => {
@@ -453,7 +373,6 @@ const CoverageGapAnalysisMain = () => {
     const merapiLat = -7.540585;
     const merapiLng = 110.44638;
 
-    const riskCategories = { veryHigh: 0, high: 0, medium: 0, low: 0 };
     let totalCoverageArea = 0;
     const coverageAnalysis = {};
     const distanceAnalysis = {};
@@ -470,13 +389,6 @@ const CoverageGapAnalysisMain = () => {
           merapiLat,
           merapiLng
         );
-
-        const riskScore = Math.max(0, 100 - distanceFromMerapi * 4);
-
-        if (riskScore >= 75) riskCategories.veryHigh++;
-        else if (riskScore >= 50) riskCategories.high++;
-        else if (riskScore >= 25) riskCategories.medium++;
-        else riskCategories.low++;
 
         const coverageArea =
           (Math.PI * serviceRadius * serviceRadius) / 1000000;
@@ -502,7 +414,6 @@ const CoverageGapAnalysisMain = () => {
     });
 
     return {
-      riskCategories,
       totalCoverageArea,
       coverageAnalysis,
       distanceAnalysis,
@@ -691,8 +602,7 @@ const CoverageGapAnalysisMain = () => {
               onChange={(e) => setAnalysisMode(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
-              <option value="coverage">🗺️ Coverage Gap Analysis</option>
-              <option value="risk">⚠️ Distance-based Risk</option>
+              <option value="coverage">🗺️ Density Visualization</option>
             </select>
           </div>
 
@@ -733,12 +643,6 @@ const CoverageGapAnalysisMain = () => {
                   <>
                     <Target className="w-4 h-4" />
                     Coverage Analysis
-                  </>
-                )}
-                {analysisMode === "risk" && (
-                  <>
-                    <AlertTriangle className="w-4 h-4" />
-                    Risk Analysis
                   </>
                 )}
               </h3>
@@ -831,81 +735,6 @@ const CoverageGapAnalysisMain = () => {
                     </>
                   )}
 
-                  {analysisMode === "risk" && (
-                    <div className="space-y-3">
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Shield className="w-4 h-4 text-red-600" />
-                          <span className="font-medium text-red-800">
-                            Very High Risk
-                          </span>
-                        </div>
-                        <div className="text-red-700">
-                          {analysisResults.riskCategories.veryHigh} barak (&lt;5
-                          km from Merapi)
-                        </div>
-                      </div>
-                      <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Shield className="w-4 h-4 text-orange-600" />
-                          <span className="font-medium text-orange-800">
-                            High Risk
-                          </span>
-                        </div>
-                        <div className="text-orange-700">
-                          {analysisResults.riskCategories.high} barak (5-12.5 km
-                          from Merapi)
-                        </div>
-                      </div>
-                      <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Shield className="w-4 h-4 text-yellow-600" />
-                          <span className="font-medium text-yellow-800">
-                            Medium Risk
-                          </span>
-                        </div>
-                        <div className="text-yellow-700">
-                          {analysisResults.riskCategories.medium} barak
-                          (12.5-18.75 km from Merapi)
-                        </div>
-                      </div>
-                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Shield className="w-4 h-4 text-green-600" />
-                          <span className="font-medium text-green-800">
-                            Low Risk
-                          </span>
-                        </div>
-                        <div className="text-green-700">
-                          {analysisResults.riskCategories.low} barak (&gt;18.75
-                          km from Merapi)
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-700">
-                          Rerata Jarak ke Merapi:
-                        </h4>
-                        {Object.entries(analysisResults.distanceAnalysis)
-                          .sort((a, b) => a[1].avgDistance - b[1].avgDistance)
-                          .slice(0, 5)
-                          .map(([kec, data]) => (
-                            <div
-                              key={kec}
-                              className="p-2 bg-gray-50 rounded text-xs"
-                            >
-                              <div className="font-medium">{kec}</div>
-                              <div className="flex justify-between">
-                                <span>
-                                  Rerata Jarak: {data.avgDistance.toFixed(1)} km
-                                </span>
-                                <span>Barak: {data.distances.length}</span>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -1031,10 +860,6 @@ const CoverageGapAnalysisMain = () => {
             />
           )}
 
-          {analysisMode === "risk" && mapInstance && (
-            <DistanceRiskAnalysis data={filteredBaraks} map={mapInstance} />
-          )}
-
           {mapInstance && (
             <MarkerClustering
               data={filteredBaraks}
@@ -1080,7 +905,7 @@ const CoverageGapAnalysisMain = () => {
               })}
         </MapContainer>
       </div>
-      {(analysisMode === "coverage" || analysisMode === "risk") && (
+      {(analysisMode === "coverage") && (
         <div className="fixed bottom-4 right-4 z-[1000] bg-white p-4 rounded-lg shadow-lg max-w-xs text-sm">
           <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
             <Activity className="w-4 h-4" />
@@ -1109,26 +934,6 @@ const CoverageGapAnalysisMain = () => {
                   <br /> <br />
                   Area yang lebih gelap menunjukkan konsentrasi barak yang lebih
                   tinggi; area yang lebih terang menunjukkan celah
-                </div>
-              </>
-            )}
-            {analysisMode === "risk" && (
-              <>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                  <span>Low Risk (&gt;18.75 km)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-                  <span>Medium Risk (12.5-18.75 km)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-orange-500"></div>
-                  <span>High Risk (5-12.5 km)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-red-600"></div>
-                  <span>Very High Risk (&lt;5 km)</span>
                 </div>
               </>
             )}
